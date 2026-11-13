@@ -1,0 +1,66 @@
+<?php
+
+namespace App\Http\Controllers\Front\Auth;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Auth\Events\PasswordReset;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Str;
+use Illuminate\Validation\Rules\Password as PasswordRule;
+use Illuminate\View\View;
+
+class CustomerPasswordResetController extends Controller
+{
+    protected string $broker = 'customers';
+
+    public function requestForm(): View
+    {
+        return view('front.auth.forgot-password');
+    }
+
+    public function sendLink(Request $request): RedirectResponse
+    {
+        $request->validate(['email' => ['required', 'email']]);
+
+        $status = Password::broker($this->broker)->sendResetLink($request->only('email'));
+
+        return $status === Password::ResetLinkSent
+            ? back()->with('success', __($status))
+            : back()->withInput($request->only('email'))->withErrors(['email' => __($status)]);
+    }
+
+    public function resetForm(Request $request, string $token): View
+    {
+        return view('front.auth.reset-password', [
+            'token' => $token,
+            'email' => $request->query('email'),
+        ]);
+    }
+
+    public function reset(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'token' => ['required'],
+            'email' => ['required', 'email'],
+            'password' => ['required', 'confirmed', PasswordRule::min(8)->letters()->numbers()],
+        ]);
+
+        $status = Password::broker($this->broker)->reset(
+            $request->only('email', 'password', 'password_confirmation', 'token'),
+            function ($customer) use ($request) {
+                $customer->forceFill([
+                    'password' => $request->password,
+                    'remember_token' => Str::random(60),
+                ])->save();
+
+                event(new PasswordReset($customer));
+            }
+        );
+
+        return $status === Password::PasswordReset
+            ? redirect()->route('customer.login')->with('success', __($status))
+            : back()->withInput($request->only('email'))->withErrors(['email' => __($status)]);
+    }
+}

@@ -1,0 +1,31 @@
+// FurniCraft brand tokens — shared by the storefront and the admin panel.
+
+$fc-navy:        #16263f;
+$fc-navy-700:    #1d3252;
+$fc-navy-500:    #2a4066;
+$fc-gold:        #e0a83e;
+$fc-gold-600:    #cf9830;
+$fc-gold-100:    #fcf3e0;
+$fc-ink:         #1f2937;
+$fc-muted:       #6b7280;
+$fc-line:        #e5e7eb;
+$fc-surface:     #f5f6f7;
+$fc-tile:        #eeeeee;
+
+// Bootstrap overrides
+$primary:        $fc-navy;
+$secondary:      $fc-gold;
+$body-color:     $fc-ink;
+$border-color:   $fc-line;
+
+$font-family-sans-serif: 'Poppins', 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
+$headings-font-weight: 700;
+
+$border-radius:    .5rem;
+$border-radius-sm: .375rem;
+$border-radius-lg: .75rem;
+$border-radius-xl: 1rem;
+
+$input-focus-border-color:  $fc-gold;
+$input-btn-focus-color:     rgba($fc-gold, .25);
+$input-btn-focus-box-shadow: 0 0 0 .2rem rgba(224, 168, 62, .2);

@@ -1,0 +1,20 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Setting extends Model
+{
+    protected $fillable = [
+        'group',
+        'key',
+        'value',
+        'type',
+    ];
+
+    public function scopeGroup($query, string $group)
+    {
+        return $query->where('group', $group);
+    }
+}

@@ -1,0 +1,16 @@
+{
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "vendor": "node build/copy-vendor.mjs",
+        "css": "sass resources/scss/app.scss:public/assets/css/app.css resources/scss/admin.scss:public/assets/css/admin.css --load-path=node_modules --style=compressed --no-source-map --quiet",
+        "js": "node build/copy-js.mjs",
+        "build": "npm run vendor && npm run js && npm run css",
+        "dev": "sass --watch resources/scss/app.scss:public/assets/css/app.css resources/scss/admin.scss:public/assets/css/admin.css --load-path=node_modules --no-source-map --quiet"
+    },
+    "devDependencies": {
+        "bootstrap": "^5.3.3",
+        "bootstrap-icons": "^1.11.3",
+        "sass": "^1.108.2"
+    }
+}

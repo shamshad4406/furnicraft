@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 520" role="img" aria-label="Modern living room">
+
+  <defs>
+    <linearGradient id="bg1" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#F6EFE4"/><stop offset="1" stop-color="#E7D9C4"/>
+    </linearGradient>
+    <linearGradient id="glow1" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity=".55"/><stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="520" fill="url(#bg1)"/>
+  <rect x="820" y="0" width="380" height="520" fill="#A9703F"/>
+  <rect x="832" y="0" width="14" height="520" fill="#ffffff" opacity=".09"/><rect x="864" y="0" width="14" height="520" fill="#ffffff" opacity=".09"/><rect x="896" y="0" width="14" height="520" fill="#ffffff" opacity=".09"/><rect x="928" y="0" width="14" height="520" fill="#ffffff" opacity=".09"/><rect x="960" y="0" width="14" height="520" fill="#ffffff" opacity=".09"/><rect x="992" y="0" width="14" height="520" fill="#ffffff" opacity=".09"/><rect x="1024" y="0" width="14" height="520" fill="#ffffff" opacity=".09"/><rect x="1056" y="0" width="14" height="520" fill="#ffffff" opacity=".09"/><rect x="1088" y="0" width="14" height="520" fill="#ffffff" opacity=".09"/><rect x="1120" y="0" width="14" height="520" fill="#ffffff" opacity=".09"/><rect x="1152" y="0" width="14" height="520" fill="#ffffff" opacity=".09"/>
+  <rect x="60" y="40" width="300" height="300" rx="10" fill="url(#glow1)" opacity=".7"/>
+  <rect y="400" width="1200" height="120" fill="#CDBA9E"/>
+  <rect y="400" width="1200" height="8" fill="#000" opacity=".06"/>
+  
+  <ellipse cx="760" cy="418" rx="300" ry="18" fill="#000" opacity=".10"/>
+  <rect x="560" y="236" width="400" height="96" rx="26" fill="#DCCBB2"/>
+  <rect x="582" y="258" width="166" height="74" rx="18" fill="#CDB896"/>
+  <rect x="772" y="258" width="166" height="74" rx="18" fill="#CDB896"/>
+  <rect x="534" y="290" width="58" height="112" rx="20" fill="#D4C0A3"/>
+  <rect x="928" y="290" width="58" height="112" rx="20" fill="#D4C0A3"/>
+  <rect x="586" y="320" width="348" height="66" rx="18" fill="#E7D9C2"/>
+  <rect x="600" y="266" width="58" height="58" rx="12" fill="#E8A33C" transform="rotate(-8 629 295)"/>
+  <rect x="690" y="268" width="54" height="54" rx="12" fill="#F0E6D6" transform="rotate(6 717 295)"/>
+  <rect x="598" y="386" width="18" height="28" rx="6" fill="#7A4F2B"/>
+  <rect x="904" y="386" width="18" height="28" rx="6" fill="#7A4F2B"/>
+  <rect x="320" y="340" width="230" height="20" rx="8" fill="#B9834F"/>
+  <rect x="320" y="356" width="230" height="10" rx="4" fill="#8A5A30"/>
+  <rect x="344" y="366" width="14" height="46" rx="5" fill="#A9703F"/>
+  <rect x="512" y="366" width="14" height="46" rx="5" fill="#A9703F"/>
+  <rect x="388" y="318" width="60" height="24" rx="4" fill="#F4F1EA"/>
+  <rect x="392" y="312" width="52" height="8" rx="3" fill="#E8A33C"/>
+  <ellipse cx="240" cy="408" rx="56" ry="10" fill="#000" opacity=".08"/>
+  <path d="M212 408h56l-8-74h-40z" fill="#EFEFEC"/>
+  <path d="M240 334c-28-10-44-40-34-70 30-4 56 16 60 44 6-30 32-48 62-42 6 32-14 60-44 68z" fill="#4E7A52"/>
+  <rect x="1046" y="214" width="12" height="190" rx="5" fill="#8A8F97"/>
+  <path d="M1012 214h80l-14-54h-52z" fill="#F2EADA"/>
+  <rect x="1026" y="398" width="52" height="10" rx="5" fill="#8A8F97"/>
+
+</svg>

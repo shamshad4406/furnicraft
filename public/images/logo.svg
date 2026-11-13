@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 56" role="img" aria-label="FurniCraft">
+
+  <path d="M36 4 4 24v4h8v24h48V28h8v-4z" fill="none" stroke="#16263F" stroke-width="4" stroke-linejoin="round"/>
+  <rect x="17" y="32" width="38" height="13" rx="4" fill="#16263F"/>
+  <rect x="13" y="30" width="9" height="17" rx="4" fill="#16263F"/>
+  <rect x="50" y="30" width="9" height="17" rx="4" fill="#16263F"/>
+  <rect x="21" y="26" width="30" height="8" rx="3" fill="#E0A83E"/>
+</svg>
