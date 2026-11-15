@@ -16,6 +16,7 @@ class DatabaseSeeder extends Seeder
             CatalogDemoImageSeeder::class,
             DeliverySeeder::class,
             CmsPageSeeder::class,
+            ShopDemoSeeder::class,
         ]);
     }
 }

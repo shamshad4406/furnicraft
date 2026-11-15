@@ -35,4 +35,22 @@ return [
         ],
     ],
 
+
+    /*
+    |--------------------------------------------------------------------------
+    | Razorpay
+    |--------------------------------------------------------------------------
+    |
+    | Test keys start "rzp_test_", live keys "rzp_live_". The webhook secret is
+    | set separately in the Razorpay dashboard and is what proves an incoming
+    | webhook really came from them.
+    |
+    */
+
+    "razorpay" => [
+        "key" => env("RAZORPAY_KEY"),
+        "secret" => env("RAZORPAY_SECRET"),
+        "webhook_secret" => env("RAZORPAY_WEBHOOK_SECRET"),
+        "currency" => env("RAZORPAY_CURRENCY", "INR"),
+    ],
 ];

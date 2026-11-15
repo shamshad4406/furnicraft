@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Support\BundledArt;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Storage;
 
@@ -42,18 +43,31 @@ class ProductImage extends Model
 
     public function getUrlAttribute(): ?string
     {
-        return $this->path && Storage::disk('public')->exists($this->path)
-            ? Storage::disk('public')->url($this->path)
-            : null;
+        return $this->resolve($this->path);
     }
 
     public function getThumbnailUrlAttribute(): ?string
     {
-        if ($this->thumbnail_path && Storage::disk('public')->exists($this->thumbnail_path)) {
-            return Storage::disk('public')->url($this->thumbnail_path);
+        return $this->resolve($this->thumbnail_path) ?? $this->url;
+    }
+
+    /**
+     * Bundled demo artwork lives in public/images; uploads live on the
+     * public disk.
+     */
+    protected function resolve(?string $path): ?string
+    {
+        if (! $path) {
+            return null;
         }
 
-        return $this->url;
+        if (BundledArt::is($path)) {
+            return BundledArt::exists($path) ? BundledArt::url($path) : null;
+        }
+
+        return Storage::disk('public')->exists($path)
+            ? Storage::disk('public')->url($path)
+            : null;
     }
 
     /**
@@ -63,6 +77,11 @@ class ProductImage extends Model
     {
         static::deleting(function (self $image) {
             foreach (array_filter([$image->path, $image->thumbnail_path]) as $path) {
+                // Never delete artwork that ships with the application.
+                if (BundledArt::is($path)) {
+                    continue;
+                }
+
                 if (Storage::disk('public')->exists($path)) {
                     Storage::disk('public')->delete($path);
                 }

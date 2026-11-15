@@ -37,6 +37,10 @@ class RolePermissionSeeder extends Seeder
         'reports' => ['view'],
         'banners' => ['view', 'create', 'edit', 'delete'],
         'reviews' => ['view', 'edit', 'delete'],
+        // Its own module, not a corner of 'banners': the list is personal
+        // data, and somebody who may change a homepage slide has no
+        // business exporting every subscriber's email address.
+        'newsletter' => ['view', 'edit'],
     ];
 
     /**
@@ -49,7 +53,7 @@ class RolePermissionSeeder extends Seeder
         'Manager' => [
             'dashboard', 'categories', 'brands', 'products', 'cms', 'customers',
             'coupons', 'orders', 'shipments', 'enquiries', 'quotations',
-            'inventory', 'suppliers', 'purchases', 'reports', 'banners', 'reviews',
+            'inventory', 'suppliers', 'purchases', 'reports', 'banners', 'reviews', 'newsletter',
             'activity',
         ],
         'Sales' => ['dashboard', 'enquiries', 'quotations', 'customers', 'orders', 'products', 'reports'],

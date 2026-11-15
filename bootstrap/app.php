@@ -16,6 +16,12 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
         then: function () {
+            // Webhooks: no session, no CSRF — authenticated by signature.
+            Illuminate\Support\Facades\Route::middleware('api')
+                ->prefix('webhooks')
+                ->name('webhooks.')
+                ->group(base_path('routes/webhooks.php'));
+
             Illuminate\Support\Facades\Route::middleware('web')
                 ->prefix('admin')
                 ->name('admin.')
@@ -53,8 +59,12 @@ return Application::configure(basePath: dirname(__DIR__))
         // A file that passed the rules but is not a usable image comes back as
         // a form error, not a 500.
         $exceptions->render(function (InvalidImageException $e, Request $request) {
-            $field = collect(['images', 'image', 'logo', 'avatar', 'company_logo', 'company_favicon'])
-                ->first(fn ($name) => $request->hasFile($name)) ?? 'image';
+            // Attach it to whichever field actually carried a file, so the
+            // message lands next to the input the person used. A hard-coded
+            // list goes stale the moment a new form adds an upload, and the
+            // error then renders against a field that is not on the page —
+            // which looks to the person like nothing happened at all.
+            $field = collect(array_keys($request->allFiles()))->first() ?? 'image';
 
             return back()->withInput()->withErrors([$field => $e->getMessage()]);
         });

@@ -1,0 +1,49 @@
+# Uploads are data, never code.
+#
+# This file is served through the public/storage symlink, so it applies to
+# everything staff upload. It is deliberately defensive: the application only
+# ever writes WebP, but a web-server misconfiguration should not be the only
+# thing standing between an upload and code execution.
+
+# 1. Never hand a file here to an interpreter.
+<IfModule mod_php.c>
+    php_flag engine off
+</IfModule>
+<IfModule mod_php7.c>
+    php_flag engine off
+</IfModule>
+<IfModule mod_php8.c>
+    php_flag engine off
+</IfModule>
+
+RemoveHandler .php .phtml .php3 .php4 .php5 .php7 .php8 .pht .phar .cgi .pl .py .jsp .asp .sh
+RemoveType .php .phtml .php3 .php4 .php5 .php7 .php8 .pht .phar .cgi .pl .py .jsp .asp .sh
+
+<FilesMatch "\.(php|phtml|php[3-8]|pht|phar|cgi|pl|py|jsp|asp|sh|exe|htaccess)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+<IfModule mod_headers.c>
+    # 2. Stop the browser guessing a different type for an upload.
+    Header always set X-Content-Type-Options "nosniff"
+
+    # 3. An SVG or XML opened directly runs its own script in our origin.
+    #    Force it to download instead, and sandbox it if it is rendered at all.
+    <FilesMatch "\.(svg|svgz|xml|xhtml|html?)$">
+        Header always set Content-Disposition "attachment"
+        Header always set Content-Security-Policy "default-src 'none'; style-src 'unsafe-inline'; sandbox"
+    </FilesMatch>
+
+    # 4. Images here are content-addressed by filename, so they cache well.
+    <FilesMatch "\.(webp|jpe?g|png|gif|avif)$">
+        Header set Cache-Control "public, max-age=2592000, immutable"
+    </FilesMatch>
+</IfModule>
+
+Options -Indexes -ExecCGI

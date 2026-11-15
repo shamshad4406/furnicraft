@@ -4,8 +4,8 @@ namespace Database\Seeders;
 
 use App\Models\Category;
 use App\Models\Product;
+use App\Support\BundledArt;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Storage;
 
 /**
  * Attaches the bundled placeholder artwork to the demo catalog so the
@@ -57,10 +57,8 @@ class CatalogDemoImageSeeder extends Seeder
                 continue;
             }
 
-            $path = 'categories/'.$slug.'.svg';
-            Storage::disk('public')->put($path, (string) file_get_contents($source));
-
-            $category->image = $path;
+            // Referenced in place, not copied into the uploads directory.
+            $category->image = BundledArt::reference($art);
             $category->saveQuietly();
             $count++;
         }
@@ -90,10 +88,7 @@ class CatalogDemoImageSeeder extends Seeder
                 continue;
             }
 
-            // Each product gets its own copy, so deleting one image cannot
-            // remove a file another product is still using.
-            $path = 'products/'.$product->id.'/'.$product->slug.'.svg';
-            Storage::disk('public')->put($path, (string) file_get_contents($source));
+            $path = BundledArt::reference($art);
 
             $product->images()->create([
                 'path' => $path,

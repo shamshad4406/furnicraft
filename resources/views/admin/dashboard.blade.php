@@ -12,7 +12,11 @@
                         <div class="ad-stat ad-stat--{{ $stat['tone'] }}">
                             <div class="ad-stat__icon"><i class="bi {{ $stat['icon'] }}"></i></div>
                             <div>
-                                <div class="ad-stat__value">{{ number_format($stat['value']) }}</div>
+                                {{-- "raw" tiles arrive already formatted (money,
+                                     say); number_format would mangle them. --}}
+                                <div class="ad-stat__value">
+                                    {{ ($stat['raw'] ?? false) ? $stat['value'] : number_format($stat['value']) }}
+                                </div>
                                 <div class="ad-stat__label">{{ $stat['label'] }}</div>
                                 <div class="text-muted" style="font-size:.74rem">{{ $stat['sub'] }}</div>
                             </div>

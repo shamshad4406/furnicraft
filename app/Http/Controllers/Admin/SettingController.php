@@ -20,6 +20,9 @@ class SettingController extends Controller implements HasMiddleware
         'mail' => ['label' => 'SMTP / Email', 'icon' => 'bi-envelope-at'],
         'localisation' => ['label' => 'Currency & Locale', 'icon' => 'bi-currency-rupee'],
         'order' => ['label' => 'Order Numbering', 'icon' => 'bi-hash'],
+        'checkout' => ['label' => 'Checkout & COD', 'icon' => 'bi-bag-check'],
+        'inventory' => ['label' => 'Inventory', 'icon' => 'bi-boxes'],
+        'marketing' => ['label' => 'Marketing & SEO', 'icon' => 'bi-megaphone'],
         'social' => ['label' => 'Social Links', 'icon' => 'bi-share'],
         'system' => ['label' => 'System', 'icon' => 'bi-sliders'],
     ];
@@ -144,6 +147,23 @@ class SettingController extends Controller implements HasMiddleware
                 'social_instagram' => ['nullable', 'url', 'max:200'],
                 'social_linkedin' => ['nullable', 'url', 'max:200'],
             ],
+            'checkout' => [
+                'cod_advance_limit' => ['required', 'numeric', 'min:0', 'max:9999999'],
+                'cod_advance_percent' => ['required', 'numeric', 'between:0,100'],
+                'min_order_value' => ['required', 'numeric', 'min:0', 'max:9999999'],
+                'checkout_terms_note' => ['nullable', 'string', 'max:500'],
+            ],
+            'inventory' => [
+                'low_stock_threshold' => ['required', 'integer', 'min:0', 'max:999999'],
+                'stock_alert_email' => ['nullable', 'email', 'max:160'],
+            ],
+            'marketing' => [
+                // Google's own format, so a mistyped ID is caught here rather
+                // than by weeks of missing data.
+                'google_analytics_id' => ['nullable', 'string', 'max:30', 'regex:/^(G-[A-Z0-9]{6,12}|UA-\d{4,10}-\d{1,4})$/'],
+                'google_site_verification' => ['nullable', 'string', 'max:120', 'regex:/^[A-Za-z0-9_\-]+$/'],
+                'newsletter_intro' => ['nullable', 'string', 'max:300'],
+            ],
             'system' => [
                 'admin_login_throttle' => ['required', 'integer', 'between:1,20'],
             ],
@@ -156,6 +176,14 @@ class SettingController extends Controller implements HasMiddleware
      */
     protected function booleanKeys(string $group): array
     {
-        return $group === 'system' ? ['maintenance_mode'] : [];
+        return match ($group) {
+            'system' => ['maintenance_mode'],
+            'checkout' => ['cod_enabled', 'guest_checkout_enabled'],
+            'marketing' => [
+                'seo_allow_indexing', 'reviews_enabled', 'reviews_require_purchase',
+                'newsletter_enabled', 'newsletter_double_optin',
+            ],
+            default => [],
+        };
     }
 }

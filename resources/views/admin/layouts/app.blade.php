@@ -13,6 +13,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
+    <link rel="preload" href="{{ asset('assets/css/fonts/bootstrap-icons.woff2') }}" as="font" type="font/woff2" crossorigin>
     <link rel="stylesheet" href="{{ asset_v('assets/css/admin.css') }}">
     @stack('styles')
 </head>
@@ -32,7 +33,8 @@
 
     <footer class="ad-footer">
         <span>{{ settings('company_copyright', '© '.date('Y').' FurniCraft') }}</span>
-        <span>Phase 2 — Catalog Management · Laravel {{ app()->version() }}</span>
+        @php $phase = (int) config('phases.current'); @endphp
+        <span>Phase {{ $phase }} — {{ config('phases.list.'.$phase.'.name') }} · Laravel {{ app()->version() }}</span>
     </footer>
 </div>
 

@@ -272,6 +272,161 @@
         });
     }
 
+    /* ------------------------------------------------ checkout form */
+    function initCheckoutForm() {
+        var form = document.getElementById('checkoutForm');
+        if (!form) { return; }
+
+        // Billing fields appear only when billing differs from shipping.
+        var sameToggle = form.querySelector('[data-billing-toggle]');
+        var billingFields = document.getElementById('billingFields');
+
+        if (sameToggle && billingFields) {
+            var syncBilling = function () {
+                billingFields.classList.toggle('d-none', sameToggle.checked);
+            };
+            sameToggle.addEventListener('change', syncBilling);
+            syncBilling();
+        }
+
+        // Picking a saved address fills the shipping fields.
+        form.querySelectorAll('input[name="saved_address_id"]').forEach(function (radio) {
+            radio.addEventListener('change', function () {
+                if (!radio.dataset.address) { return; }
+
+                var address;
+                try { address = JSON.parse(radio.dataset.address); } catch (e) { return; }
+
+                Object.keys(address).forEach(function (key) {
+                    var field = form.querySelector('[name="shipping[' + key + ']"]');
+                    if (field && address[key]) { field.value = address[key]; }
+                });
+            });
+        });
+
+        // One submission per click: the server is idempotent, but there is no
+        // reason to let the customer fire three requests.
+        var submit = form.querySelector('[data-submit-once]');
+
+        if (submit) {
+            form.addEventListener('submit', function () {
+                window.setTimeout(function () {
+                    submit.disabled = true;
+                    submit.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Placing your order…';
+                }, 0);
+            });
+        }
+    }
+
+    /* ----------------------------------------------- Razorpay payment */
+    function initPayment() {
+        var card = document.querySelector('[data-pay]');
+        if (!card) { return; }
+
+        var button = card.querySelector('[data-pay-button]');
+        var status = card.querySelector('[data-pay-status]');
+        var busy = false;
+
+        function say(message, tone) {
+            status.textContent = message || '';
+            status.className = 'fc-pay-card__note' + (tone ? ' is-' + tone : '');
+        }
+
+        function postBack(url, fields) {
+            // A real form post, so the server sees a normal request and the
+            // CSRF token travels with it.
+            var form = document.createElement('form');
+            form.method = 'POST';
+            form.action = url;
+
+            var token = document.querySelector('meta[name="csrf-token"]');
+            fields._token = token ? token.content : '';
+
+            Object.keys(fields).forEach(function (name) {
+                var input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = name;
+                input.value = fields[name];
+                form.appendChild(input);
+            });
+
+            document.body.appendChild(form);
+            form.submit();
+        }
+
+        button.addEventListener('click', function () {
+            if (busy) { return; }
+
+            if (typeof window.Razorpay === 'undefined') {
+                say('The payment library could not load. Check your connection and refresh.', 'error');
+                return;
+            }
+
+            busy = true;
+            button.disabled = true;
+            say('Opening the secure payment window…');
+
+            var token = document.querySelector('meta[name="csrf-token"]');
+
+            fetch(card.dataset.createUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': token ? token.content : '',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+                .then(function (response) {
+                    return response.json().then(function (body) {
+                        if (!response.ok) { throw new Error(body.error || 'Could not start the payment.'); }
+                        return body;
+                    });
+                })
+                .then(function (data) {
+                    var checkout = new window.Razorpay({
+                        key: data.key,
+                        order_id: data.order_id,
+                        amount: data.amount,
+                        currency: data.currency,
+                        name: data.name,
+                        description: data.description,
+                        prefill: data.prefill,
+                        theme: { color: card.dataset.theme || '#16263f' },
+                        // Verified server-side; the browser only carries it.
+                        handler: function (response) {
+                            say('Payment received — confirming with our server…');
+                            postBack(card.dataset.callbackUrl, {
+                                razorpay_order_id: response.razorpay_order_id,
+                                razorpay_payment_id: response.razorpay_payment_id,
+                                razorpay_signature: response.razorpay_signature
+                            });
+                        },
+                        modal: {
+                            ondismiss: function () {
+                                busy = false;
+                                button.disabled = false;
+                                say('Payment window closed. You can try again.', 'error');
+                            }
+                        }
+                    });
+
+                    checkout.on('payment.failed', function (response) {
+                        var reason = (response.error && response.error.description) || 'Payment failed';
+                        postBack(card.dataset.cancelUrl, { reason: reason });
+                    });
+
+                    checkout.open();
+                    say('');
+                })
+                .catch(function (error) {
+                    busy = false;
+                    button.disabled = false;
+                    say(error.message || 'Something went wrong. Please try again.', 'error');
+                });
+        });
+    }
+
     /* ----------------------------------------------- mobile filters */
     function initFilterToggle() {
         var toggle = document.querySelector('[data-filters-toggle]');
@@ -293,6 +448,15 @@
         initSearchSuggest();
         initFilterToggle();
         initAutoSubmit();
+        initCheckoutForm();
+        initPayment();
+
+        // Confirm before a destructive storefront action.
+        document.querySelectorAll('form[data-confirm]').forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!window.confirm(form.dataset.confirm)) { event.preventDefault(); }
+            });
+        });
 
         // Auto-dismiss flash messages.
         document.querySelectorAll('.alert-dismissible[data-auto-dismiss]').forEach(function (alert) {

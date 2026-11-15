@@ -3,18 +3,32 @@
 use App\Http\Controllers\Admin\ActivityLogController;
 use App\Http\Controllers\Admin\Auth\LoginController;
 use App\Http\Controllers\Admin\Auth\PasswordResetController;
+use App\Http\Controllers\Admin\BannerController;
 use App\Http\Controllers\Admin\BrandController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\CmsPageController;
+use App\Http\Controllers\Admin\CouponController;
+use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DeliveryZoneController;
+use App\Http\Controllers\Admin\EnquiryController;
+use App\Http\Controllers\Admin\InventoryController;
+use App\Http\Controllers\Admin\NewsletterController;
+use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\PincodeController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ProductImageController;
 use App\Http\Controllers\Admin\ProductImportController;
 use App\Http\Controllers\Admin\ProfileController;
+use App\Http\Controllers\Admin\PurchaseOrderController;
+use App\Http\Controllers\Admin\QuotationController;
+use App\Http\Controllers\Admin\ReportController;
+use App\Http\Controllers\Admin\ReturnController;
+use App\Http\Controllers\Admin\ReviewController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\SettingController;
+use App\Http\Controllers\Admin\ShipmentController;
+use App\Http\Controllers\Admin\SupplierController;
 use App\Http\Controllers\Admin\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -65,6 +79,139 @@ Route::middleware(['auth:admin', 'account.active:admin'])->group(function () {
         Route::put('{image}', [ProductImageController::class, 'update'])->name('update');
         Route::patch('{image}/primary', [ProductImageController::class, 'primary'])->name('primary');
         Route::delete('{image}', [ProductImageController::class, 'destroy'])->name('destroy');
+    });
+
+    /* ------------------------------------------- Phase 4: marketing */
+
+    Route::resource('coupons', CouponController::class);
+    Route::patch('coupons/{coupon}/toggle', [CouponController::class, 'toggle'])->name('coupons.toggle');
+
+    /* ------------------------------------- Phase 5: orders & delivery */
+
+    Route::controller(OrderController::class)->prefix('orders')->name('orders.')->group(function () {
+        Route::get('/', 'index')->name('index');
+        // Before {order}, or "export" is read as an order token.
+        Route::get('export', 'export')->name('export');
+        Route::get('{order}', 'show')->name('show');
+        Route::patch('{order}/status', 'updateStatus')->name('status');
+        Route::patch('{order}/notes', 'updateNotes')->name('notes');
+        Route::post('{order}/invoice', 'raiseInvoice')->name('invoice.raise');
+        Route::get('{order}/invoice', 'invoice')->name('invoice');
+    });
+
+    Route::controller(ShipmentController::class)->name('shipments.')->group(function () {
+        Route::get('shipments', 'index')->name('index');
+        Route::post('orders/{order}/shipments', 'store')->name('store');
+        Route::put('shipments/{shipment}', 'update')->name('update');
+        Route::patch('shipments/{shipment}/status', 'updateStatus')->name('status');
+        Route::delete('shipments/{shipment}', 'destroy')->name('destroy');
+    });
+
+    Route::controller(ReturnController::class)->name('returns.')->group(function () {
+        Route::get('returns', 'index')->name('index');
+        Route::get('returns/{return}', 'show')->name('show');
+        Route::post('orders/{order}/returns', 'store')->name('store');
+        Route::patch('returns/{return}/approve', 'approve')->name('approve');
+        Route::patch('returns/{return}/reject', 'reject')->name('reject');
+        Route::patch('returns/{return}/picked-up', 'pickUp')->name('pickup');
+        Route::patch('returns/{return}/receive', 'receive')->name('receive');
+        Route::patch('returns/{return}/close', 'close')->name('close');
+        Route::patch('returns/{return}/refund', 'refund')->name('refund');
+        Route::patch('returns/{return}/replace', 'replace')->name('replace');
+    });
+
+    /* --------------------------------- Phase 6: enquiry & quotation */
+
+    Route::controller(EnquiryController::class)->prefix('enquiries')->name('enquiries.')->group(function () {
+        Route::get('/', 'index')->name('index');
+        // Before {enquiry}, or "create" is read as a token.
+        Route::get('create', 'create')->name('create');
+        Route::post('/', 'store')->name('store');
+        Route::get('{enquiry}', 'show')->name('show');
+        Route::post('{enquiry}/reply', 'reply')->name('reply');
+        Route::patch('{enquiry}/assign', 'assign')->name('assign');
+        Route::patch('{enquiry}/close', 'close')->name('close');
+        Route::patch('{enquiry}/reopen', 'reopen')->name('reopen');
+        Route::patch('{enquiry}/note', 'updateNote')->name('note');
+        Route::delete('{enquiry}', 'destroy')->name('destroy');
+    });
+
+    Route::controller(QuotationController::class)->prefix('quotations')->name('quotations.')->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('create', 'create')->name('create');
+        Route::post('/', 'store')->name('store');
+        Route::get('{quotation}', 'show')->name('show');
+        Route::get('{quotation}/print', 'print')->name('print');
+        Route::put('{quotation}', 'update')->name('update');
+        Route::put('{quotation}/items', 'updateItems')->name('items');
+        Route::post('{quotation}/send', 'send')->name('send');
+        Route::patch('{quotation}/accepted', 'markAccepted')->name('accepted');
+        Route::patch('{quotation}/declined', 'markDeclined')->name('declined');
+        Route::post('{quotation}/convert', 'convert')->name('convert');
+        Route::delete('{quotation}', 'destroy')->name('destroy');
+    });
+
+    /* -------------------------------- Phase 7: inventory & reports */
+
+    Route::controller(InventoryController::class)->prefix('inventory')->name('inventory.')->group(function () {
+        Route::get('/', 'index')->name('index');
+        // Both before {product}, or they are read as a product.
+        Route::get('movements', 'movements')->name('movements');
+        Route::get('export', 'export')->name('export');
+        Route::get('{product}', 'show')->name('show');
+        Route::post('{product}/adjust', 'adjust')->name('adjust');
+        Route::patch('{product}/threshold', 'updateThreshold')->name('threshold');
+    });
+
+    Route::resource('suppliers', SupplierController::class);
+    Route::patch('suppliers/{supplier}/toggle', [SupplierController::class, 'toggle'])->name('suppliers.toggle');
+
+    Route::controller(PurchaseOrderController::class)->prefix('purchases')->name('purchases.')->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('create', 'create')->name('create');
+        Route::post('/', 'store')->name('store');
+        Route::get('{purchase}', 'show')->name('show');
+        Route::put('{purchase}', 'update')->name('update');
+        Route::put('{purchase}/items', 'updateItems')->name('items');
+        Route::post('{purchase}/place', 'place')->name('place');
+        Route::post('{purchase}/receive', 'receive')->name('receive');
+        Route::patch('{purchase}/cancel', 'cancel')->name('cancel');
+        Route::delete('{purchase}', 'destroy')->name('destroy');
+    });
+
+    Route::controller(CustomerController::class)->prefix('customers')->name('customers.')->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('export', 'export')->name('export');
+        Route::get('{customer}', 'show')->name('show');
+        Route::patch('{customer}/toggle', 'toggle')->name('toggle');
+    });
+
+    Route::controller(ReportController::class)->prefix('reports')->name('reports.')->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('gst', 'gst')->name('gst');
+        Route::get('export', 'export')->name('export');
+    });
+
+    /* -------------------------------- Phase 8: marketing & reviews */
+
+    Route::resource('banners', BannerController::class)->except('show');
+    Route::patch('banners/{banner}/toggle', [BannerController::class, 'toggle'])->name('banners.toggle');
+    Route::patch('banners/{banner}/reorder', [BannerController::class, 'reorder'])->name('banners.reorder');
+
+    Route::controller(ReviewController::class)->prefix('reviews')->name('reviews.')->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::patch('{review}/approve', 'approve')->name('approve');
+        Route::patch('{review}/reject', 'reject')->name('reject');
+        Route::patch('{review}/reply', 'reply')->name('reply');
+        Route::patch('{review}/feature', 'feature')->name('feature');
+        Route::delete('{review}', 'destroy')->name('destroy');
+    });
+
+    Route::controller(NewsletterController::class)->prefix('newsletter')->name('newsletter.')->group(function () {
+        Route::get('/', 'index')->name('index');
+        // Before {subscriber}, or "export" is read as a token.
+        Route::get('export', 'export')->name('export');
+        Route::patch('{subscriber}/unsubscribe', 'unsubscribe')->name('unsubscribe');
     });
 
     /* ----------------------------------- Phase 3: content & delivery */

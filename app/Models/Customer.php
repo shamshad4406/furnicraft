@@ -47,6 +47,26 @@ class Customer extends Authenticatable
         return $this->morphMany(LoginHistory::class, 'authenticatable');
     }
 
+    public function addresses()
+    {
+        return $this->hasMany(Address::class)->latest('is_default_shipping');
+    }
+
+    public function orders()
+    {
+        return $this->hasMany(Order::class)->latest('id');
+    }
+
+    public function wishlist()
+    {
+        return $this->hasMany(Wishlist::class);
+    }
+
+    public function defaultShippingAddress()
+    {
+        return $this->hasOne(Address::class)->where('is_default_shipping', true);
+    }
+
     public function sendPasswordResetNotification($token): void
     {
         $this->notify(new ResetPasswordNotification($token, 'customer'));

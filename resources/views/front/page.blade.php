@@ -24,8 +24,9 @@
     <section class="fc-section">
         <div class="container-fc">
             <div class="row g-4">
+                {{-- h-100: these two sit side by side and should end level. --}}
                 <div class="{{ $showContactDetails ? 'col-lg-7' : 'col-lg-9 mx-auto' }}">
-                    <div class="fc-panel">
+                    <div class="fc-panel h-100">
                         @if ($page->excerpt)
                             <p class="fc-page-lead">{{ $page->excerpt }}</p>
                         @endif
@@ -39,16 +40,13 @@
 
                 @if ($showContactDetails)
                     <div class="col-lg-5">
-                        <div class="fc-panel fc-contact-card">
+                        <div class="fc-panel fc-contact-card h-100">
                             <h2 class="fc-panel__title">Reach us</h2>
 
-                            @if (request('product'))
-                                <div class="alert alert-warning py-2 px-3 small">
-                                    <i class="bi bi-info-circle me-1"></i>
-                                    Enquiring about <strong>{{ request('product') }}</strong>. Quote this when you call or write —
-                                    the enquiry form arrives in Phase 6.
-                                </div>
-                            @endif
+                            <a href="{{ route('enquiry.create', array_filter(['product' => request('product')])) }}"
+                               class="btn btn-navy w-100 mb-3">
+                                <i class="bi bi-envelope-fill"></i> Send us an enquiry
+                            </a>
 
                             <ul class="fc-contact-list">
                                 <li>

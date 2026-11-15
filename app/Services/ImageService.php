@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Exceptions\InvalidImageException;
+use App\Support\BundledArt;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -114,6 +115,11 @@ class ImageService
     public function delete(?string ...$paths): void
     {
         foreach (array_filter($paths) as $path) {
+            // Artwork shipped with the app is never deleted.
+            if (BundledArt::is($path)) {
+                continue;
+            }
+
             if (Storage::disk($this->disk)->exists($path)) {
                 Storage::disk($this->disk)->delete($path);
             }

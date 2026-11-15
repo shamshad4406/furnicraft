@@ -57,13 +57,53 @@ class SettingSeeder extends Seeder
             'order_sequence_padding' => ['5', 'number'],
             'order_next_sequence' => ['1', 'number'],
             'invoice_prefix' => ['INV', 'text'],
+            'invoice_next_sequence' => ['1', 'number'],
+            'invoice_terms' => ["Goods once sold will only be taken back as per our return policy.\nWarranty is as per the manufacturer's terms.", 'textarea'],
             'quotation_prefix' => ['QT', 'text'],
+            'quotation_next_sequence' => ['1', 'number'],
+            'enquiry_prefix' => ['ENQ', 'text'],
+            'enquiry_next_sequence' => ['1', 'number'],
+            'purchase_prefix' => ['PO', 'text'],
+            'purchase_next_sequence' => ['1', 'number'],
+            // How long a quotation stands before it lapses.
+            'quotation_validity_days' => ['15', 'number'],
+            'quotation_terms' => ["Prices hold until the validity date above.\nDelivery timelines are confirmed once the order is placed.\n50% advance is required on made-to-order items.", 'textarea'],
+            // Days after delivery in which a customer may raise a return.
+            // Zero turns self-service returns off entirely.
+            'return_window_days' => ['7', 'number'],
+            'return_policy_note' => ['Items can be returned within 7 days of delivery if they are unused and in their original packaging.', 'textarea'],
         ],
         'social' => [
             'social_facebook' => ['https://facebook.com/', 'text'],
             'social_youtube' => ['https://youtube.com/', 'text'],
             'social_instagram' => ['https://instagram.com/', 'text'],
             'social_linkedin' => ['https://linkedin.com/', 'text'],
+        ],
+        'checkout' => [
+            'cod_enabled' => ['1', 'boolean'],
+            'cod_advance_limit' => ['20000', 'number'],
+            'cod_advance_percent' => ['20', 'number'],
+            'guest_checkout_enabled' => ['1', 'boolean'],
+            'min_order_value' => ['0', 'number'],
+            'checkout_terms_note' => ['Delivery dates are confirmed by phone after the order is placed.', 'textarea'],
+        ],
+        'marketing' => [
+            // Off on staging, so a half-built shop never outranks the real one.
+            'seo_allow_indexing' => ['1', 'boolean'],
+            'google_analytics_id' => ['', 'text'],
+            'google_site_verification' => ['', 'text'],
+            'reviews_enabled' => ['1', 'boolean'],
+            // Honest but strict: only buyers may review. Most shops leave
+            // this off and rely on the "verified purchase" badge instead.
+            'reviews_require_purchase' => ['0', 'boolean'],
+            'newsletter_enabled' => ['1', 'boolean'],
+            'newsletter_double_optin' => ['1', 'boolean'],
+            'newsletter_intro' => ['New arrivals, offers and nothing else. One mail a month at most.', 'textarea'],
+        ],
+        'inventory' => [
+            // A product with no threshold of its own falls back to this.
+            'low_stock_threshold' => ['5', 'number'],
+            'stock_alert_email' => ['', 'text'],
         ],
         'system' => [
             'maintenance_mode' => ['0', 'boolean'],

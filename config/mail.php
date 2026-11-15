@@ -70,6 +70,18 @@ return [
             'path' => env('MAIL_SENDMAIL_PATH', '/usr/sbin/sendmail -bs -i'),
         ],
 
+        /*
+         * Zoho ZeptoMail over its HTTP API. Registered by
+         * App\Providers\MailServiceProvider; see config/services.php for the
+         * credentials and .env.example for the keys it reads.
+         */
+        'zeptomail' => [
+            'transport' => 'zeptomail',
+            'key' => env('ZOHO_MAIL_API_KEY'),
+            'endpoint' => env('ZOHO_API_URL', 'https://api.zeptomail.com/v1.1/email'),
+            'timeout' => env('ZOHO_MAIL_TIMEOUT', 15),
+        ],
+
         'log' => [
             'transport' => 'log',
             'channel' => env('MAIL_LOG_CHANNEL'),
@@ -79,10 +91,14 @@ return [
             'transport' => 'array',
         ],
 
+        /*
+         * If Zoho is unreachable the message is written to the log rather
+         * than lost, so a failed confirmation can still be traced and resent.
+         */
         'failover' => [
             'transport' => 'failover',
             'mailers' => [
-                'smtp',
+                'zeptomail',
                 'log',
             ],
         ],

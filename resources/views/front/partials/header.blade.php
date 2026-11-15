@@ -55,9 +55,28 @@
                     <button type="submit" aria-label="Search"><i class="bi bi-search"></i></button>
                 </form>
 
-                <a href="{{ route('page', 'contact-us') }}" class="btn btn-gold ms-lg-3 mt-2 mt-lg-0 d-inline-flex align-items-center gap-2">
-                    <i class="bi bi-envelope-fill"></i> Enquiry
-                </a>
+                @php
+                    $cartCount = app(\App\Services\CartService::class)->current(request(), false)?->item_count ?? 0;
+                @endphp
+
+                <div class="fc-header__actions ms-lg-3 mt-2 mt-lg-0">
+                    <a href="{{ route('wishlist.index') }}" class="fc-icon-link" aria-label="Wishlist">
+                        <i class="bi bi-heart"></i>
+                        <span class="d-lg-none">Wishlist</span>
+                    </a>
+
+                    <a href="{{ route('cart.index') }}" class="fc-icon-link" aria-label="Cart">
+                        <i class="bi bi-cart3"></i>
+                        <span class="d-lg-none">Cart</span>
+                        @if ($cartCount > 0)
+                            <span class="fc-icon-link__badge">{{ $cartCount > 99 ? '99+' : $cartCount }}</span>
+                        @endif
+                    </a>
+
+                    <a href="{{ route('enquiry.create') }}" class="btn btn-gold d-inline-flex align-items-center gap-2">
+                        <i class="bi bi-envelope-fill"></i> Enquiry
+                    </a>
+                </div>
             </div>
         </div>
     </div>

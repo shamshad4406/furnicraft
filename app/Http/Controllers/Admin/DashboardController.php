@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Customer;
 use App\Models\LoginHistory;
+use App\Models\Order;
+use App\Models\OrderReturn;
 use App\Models\Product;
 use App\Models\User;
 use Illuminate\View\View;
@@ -21,6 +23,64 @@ class DashboardController extends Controller
         // Each tile is gated by the same permission as the module it summarises,
         // so a role never sees figures from a module it cannot open.
         $stats = [];
+
+        // Orders first: on any working day this is what staff open the panel
+        // for, and a figure further down the page is a figure nobody reads.
+        if ($user->can('orders.view')) {
+            $needsAttention = Order::whereIn('status', ['pending', 'confirmed'])->count();
+
+            $stats[] = [
+                'label' => 'Orders to action',
+                'value' => $needsAttention,
+                'sub' => Order::where('status', 'processing')->count().' being prepared · '
+                    .Order::where('status', 'shipped')->count().' out',
+                'icon' => 'bi-bag-check',
+                'tone' => 'gold',
+            ];
+
+            // Cancelled and returned orders are not revenue, and neither is
+            // money that has not arrived yet.
+            $paidThisMonth = Order::whereNotIn('status', ['cancelled', 'returned'])
+                ->where('placed_at', '>=', now()->startOfMonth())
+                ->sum('amount_paid');
+
+            $stats[] = [
+                'label' => 'Received this month',
+                'value' => money($paidThisMonth),
+                'sub' => Order::whereNotIn('status', ['cancelled', 'returned'])
+                    ->where('placed_at', '>=', now()->startOfMonth())->count().' order(s)',
+                'icon' => 'bi-cash-stack',
+                'tone' => 'teal',
+                'raw' => true,
+            ];
+
+            $due = Order::where('payment_status', '!=', 'paid')
+                ->whereNotIn('status', ['cancelled', 'returned'])
+                ->sum('amount_due');
+
+            if ($due > 0) {
+                $stats[] = [
+                    'label' => 'Still to collect',
+                    'value' => money($due),
+                    'sub' => 'Mostly cash on delivery',
+                    'icon' => 'bi-hourglass-split',
+                    'tone' => 'rose',
+                    'raw' => true,
+                ];
+            }
+
+            $openReturns = OrderReturn::whereNotIn('status', OrderReturn::FINAL)->count();
+
+            if ($openReturns > 0) {
+                $stats[] = [
+                    'label' => 'Returns waiting',
+                    'value' => $openReturns,
+                    'sub' => 'Customers waiting on an answer',
+                    'icon' => 'bi-arrow-return-left',
+                    'tone' => 'rose',
+                ];
+            }
+        }
 
         if ($user->can('users.view')) {
             $stats[] = [
@@ -94,17 +154,20 @@ class DashboardController extends Controller
             : collect();
 
         // Phase map, so the owner can see what is built and what is next.
-        $phases = [
-            ['no' => 1, 'name' => 'Project Setup & Foundation', 'weeks' => '1', 'status' => 'done'],
-            ['no' => 2, 'name' => 'Catalog Management', 'weeks' => '2', 'status' => 'current'],
-            ['no' => 3, 'name' => 'Customer Storefront', 'weeks' => '3', 'status' => 'planned'],
-            ['no' => 4, 'name' => 'Cart, Checkout & Payments', 'weeks' => '3', 'status' => 'planned'],
-            ['no' => 5, 'name' => 'Orders & Delivery', 'weeks' => '2', 'status' => 'planned'],
-            ['no' => 6, 'name' => 'Enquiry & Quotation', 'weeks' => '1.5', 'status' => 'planned'],
-            ['no' => 7, 'name' => 'Inventory & Reports', 'weeks' => '2', 'status' => 'planned'],
-            ['no' => 8, 'name' => 'Marketing & SEO', 'weeks' => '1', 'status' => 'planned'],
-            ['no' => 9, 'name' => 'Testing & Launch', 'weeks' => '1.5', 'status' => 'planned'],
-        ];
+        // config/phases.php is the single source; moving on is one edit there.
+        $current = (int) config('phases.current');
+
+        $phases = collect(config('phases.list'))
+            ->map(fn (array $phase, int $no) => $phase + [
+                'no' => $no,
+                'status' => match (true) {
+                    $no < $current => 'done',
+                    $no === $current => 'current',
+                    default => 'planned',
+                },
+            ])
+            ->values()
+            ->all();
 
         return view('admin.dashboard', compact('stats', 'activities', 'logins', 'phases', 'canSeeAudit'));
     }

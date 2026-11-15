@@ -1,93 +1,74 @@
-<<<<<<< HEAD
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# FurniCraft — Furniture E-Commerce Platform
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+FurniCraft is a full-featured furniture e-commerce web application: a storefront where customers explore products, pick variants, save wishlists, fill a cart and pay online or on delivery, and an admin panel that runs the business behind it.
 
-## About Laravel
+Built with **Laravel 12, PHP 8.2+, MySQL/MariaDB, Bootstrap 5 and Razorpay**, in nine phases.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Where the project stands
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+| Phase | Scope | Status |
+|---|---|---|
+| 1 | [Project Setup & Foundation](PHASE-1.md) — auth, roles, staff, settings, activity log | complete |
+| 2 | [Catalog Management](PHASE-2.md) — categories, brands, products, variants, images, import/export | complete |
+| 3 | [Customer Storefront](PHASE-3.md) — homepage, listings, filters, search, product pages, CMS | complete |
+| 4 | [Cart, Checkout & Payments](PHASE-4.md) — cart, wishlist, coupons, checkout, Razorpay, COD, my account | complete |
+| 5 | [Orders & Delivery](PHASE-5.md) — admin order processing, status workflow, GST invoices, shipments, returns | complete |
+| 6 | [Enquiry & Quotation](PHASE-6.md) — enquiries, replies, quotations, accept online, convert to order | complete |
+| 7 | [Inventory & Reports](PHASE-7.md) — stock ledger, suppliers, purchase orders, customers, reports | complete |
+| 8 | [Marketing & SEO](PHASE-8.md) — banners, reviews, sitemap, robots, structured data, newsletter | complete |
+| 9 | Testing & Launch | next |
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+`config/phases.php` is the single source for this; the admin dashboard and footer read from it.
 
-## Learning Laravel
+Also worth reading: **[AUDIT.md](AUDIT.md)** (security and validation review) and **[DEPLOY.md](DEPLOY.md)** (going live).
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## Running it locally
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+```bash
+composer install
+npm install
+cp .env.example .env
+php artisan key:generate
+php artisan migrate --seed
+npm run build
+php artisan serve
+```
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+The storefront is at `/`, the admin panel at `/admin`.
 
-## Laravel Sponsors
+Seeded sign-ins (local only — outside local a password is generated and printed once):
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+| Who | Email | Password |
+|---|---|---|
+| Admin | `admin@furnicraft.in` | `Furni@2026` |
+| Manager / Sales / Inventory / Delivery | `<role>@furnicraft.in` | `Furni@2026` |
+| Customer | `customer@furnicraft.in` | `Furni@2026` |
 
-### Premium Partners
+Override with `SEED_ADMIN_PASSWORD` / `SEED_CUSTOMER_PASSWORD`. **Change them before the site is reachable from anywhere but your machine.**
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+## Build pipeline
 
-## Contributing
+There is no Vite here. Rollup's native binary is blocked by Application Control on the development machine, so assets are built with the pure-JS Sass CLI plus three small Node scripts:
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```bash
+npm run build     # vendor + icons + js + css
+npm run dev       # the same, watching
+```
 
-## Code of Conduct
+- `build/copy-vendor.mjs` — Bootstrap, Bootstrap Icons fonts
+- `build/generate-icons.mjs` — scans the views and emits only the icons actually used (155 of 2,050)
+- `build/copy-js.mjs` — app scripts
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Output lands in `public/assets/` and is linked with `asset_v()`, which appends the file's mtime so a changed file is never served from cache.
 
-## Security Vulnerabilities
+## Tests
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```bash
+php artisan test
+```
 
-## License
+671 feature tests. They run against `furnicraft_test`, configured in `phpunit.xml`; create it once with `CREATE DATABASE furnicraft_test;`.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
-=======
-# FurniCraft – Furniture E-Commerce Platform
+## Project objective
 
-FurniCraft is a modern, full-featured furniture e-commerce web application designed to provide a seamless online shopping experience for customers and an efficient business management system for administrators. The platform enables customers to explore furniture products, view detailed product information, select product variations, manage wishlists, add items to their shopping carts, and complete purchases through secure online payment options.
-
-The application is developed using Laravel 12, PHP 8.2+, MySQL 8, Bootstrap 5, and Razorpay Payment Gateway**. It follows a structured, phase-wise development approach to ensure scalability, maintainability, security, and efficient project management.
-
-Key Features & Modules
-
-- Authentication & User Management: Secure login, registration, password reset, role-based access control, and staff management.
-- Product & Catalog Management: Manage categories, brands, products, multiple images, product variants, specifications, pricing, and bulk import/export.
-- Customer Website: Responsive homepage, product listings, advanced filters, search functionality, product details, and CMS pages.
-- Shopping Cart & Checkout:** Wishlist, cart management, coupon codes, delivery charges, checkout, and order confirmation.
-- Payment Integration: Secure Razorpay online payments and Cash on Delivery (COD).
-- Order & Delivery Management: Order processing, status tracking, GST invoices, shipment management, notifications, returns, and warranty claims.
-- Enquiry & Quotation Management: Customer enquiries, custom furniture requests, quotation generation, PDF quotations, and quotation-to-order conversion.
-- Inventory Management: Stock tracking, stock adjustments, supplier management, purchase orders, and low-stock alerts.
-- Dashboard & Reports: Sales analytics, revenue reports, order reports, customer management, GST reports, and Excel/PDF exports.
-- Marketing & SEO: Banner management, customer reviews, SEO optimization, sitemap, analytics, newsletter, and WhatsApp integration.
-
-# Project Objective
-
-The main objective of FurniCraft is to digitize furniture business operations by bringing product management, online sales, payments, inventory, customer enquiries, order processing, and business reporting into a single centralized platform.
-
-The system is designed with a scalable architecture to support future enhancements and business growth while delivering a user-friendly experience across desktop, tablet, and mobile devices.
->>>>>>> af2b1e8b4730ff74b3d5e90b61de5e69fdd1d723
+Digitise furniture business operations — product management, online sales, payments, inventory, customer enquiries, order processing and reporting — in one centralised platform, on an architecture that can grow with the business and works on desktop, tablet and mobile.

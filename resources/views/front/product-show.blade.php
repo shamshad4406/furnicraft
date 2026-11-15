@@ -151,15 +151,37 @@
                     <div class="fc-pincode__result" data-pincode-result role="status" aria-live="polite"></div>
                 </div>
 
+                {{-- ---------------------------------------- add to cart --}}
+                <form method="POST" action="{{ route('cart.add') }}" class="fc-product__buy">
+                    @csrf
+                    <input type="hidden" name="product_id" value="{{ $product->id }}">
+                    <input type="hidden" name="product_variant_id" value="" data-selected-variant>
+
+                    <label for="quantity" class="visually-hidden">Quantity</label>
+                    <input type="number" id="quantity" name="quantity" value="1" min="1"
+                           max="{{ \App\Services\CartService::MAX_QUANTITY }}"
+                           class="form-control" aria-label="Quantity">
+
+                    <button type="submit" class="btn btn-gold btn-lg d-inline-flex align-items-center gap-2"
+                            @disabled($product->total_stock <= 0)>
+                        <i class="bi bi-cart-plus"></i> Add to Cart
+                    </button>
+
+                    <button type="button" class="btn btn-outline-secondary btn-lg" data-wishlist
+                            data-product-id="{{ $product->id }}" aria-pressed="false" aria-label="Save to wishlist">
+                        <i class="bi bi-heart"></i>
+                    </button>
+                </form>
+
                 <div class="fc-product__actions">
-                    <a href="{{ route('page', ['slug' => 'contact-us', 'product' => $product->slug]) }}"
-                       class="btn btn-gold btn-lg d-inline-flex align-items-center gap-2">
+                    <a href="{{ route('enquiry.create', ['product' => $product->slug]) }}"
+                       class="btn btn-navy d-inline-flex align-items-center gap-2">
                         <i class="bi bi-envelope-fill"></i> Send Enquiry
                     </a>
                     @if (settings('company_whatsapp'))
                         <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', settings('company_whatsapp')) }}?text={{ urlencode('Hi, I am interested in '.$product->name.' ('.$product->sku.')') }}"
                            target="_blank" rel="noopener noreferrer"
-                           class="btn btn-outline-success btn-lg d-inline-flex align-items-center gap-2">
+                           class="btn btn-outline-success d-inline-flex align-items-center gap-2">
                             <i class="bi bi-whatsapp"></i> WhatsApp
                         </a>
                     @endif
@@ -188,7 +210,8 @@
             <div class="row g-4 mt-1">
                 @if ($product->description)
                     <div class="col-lg-7">
-                        <div class="fc-panel">
+                        {{-- h-100: details and specifications sit side by side. --}}
+                        <div class="fc-panel h-100">
                             <h2 class="fc-panel__title">Product details</h2>
                             <div class="fc-prose">{!! nl2br(e($product->description)) !!}</div>
                         </div>
@@ -197,7 +220,7 @@
 
                 @if ($product->specifications->isNotEmpty())
                     <div class="col-lg-5">
-                        <div class="fc-panel">
+                        <div class="fc-panel h-100">
                             <h2 class="fc-panel__title">Specifications</h2>
                             <table class="fc-spec-table">
                                 <tbody>
@@ -220,4 +243,18 @@
     </div>
 </section>
 
+@include('front.partials.reviews')
+
 @endsection
+
+@section('og_type', 'product')
+@section('og_image', $product->thumbnail_url ?? (setting_file('company_logo') ?? asset('images/logo.svg')))
+
+@push('schema')
+    @include('front.partials.schema', ['data' => app(\App\Services\SeoService::class)->product($product)])
+    @include('front.partials.schema', ['data' => app(\App\Services\SeoService::class)->breadcrumbs([
+        ['name' => 'Home', 'url' => route('home')],
+        ['name' => 'Products', 'url' => route('products')],
+        ['name' => $product->name, 'url' => route('product.show', $product->slug)],
+    ])])
+@endpush

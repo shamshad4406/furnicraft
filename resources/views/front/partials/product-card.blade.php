@@ -36,9 +36,8 @@
             @endif
         </div>
 
-        {{-- The per-product enquiry form is built in Phase 6; the slug is
-             carried across so it can be pre-filled then. --}}
-        <a href="{{ route('page', ['slug' => 'contact-us', 'product' => $product->slug]) }}"
+        {{-- The slug pre-fills the enquiry form with this product. --}}
+        <a href="{{ route('enquiry.create', ['product' => $product->slug]) }}"
            class="btn btn-gold d-inline-flex align-items-center justify-content-center gap-2">
             <i class="bi bi-envelope-fill"></i> Enquiry Now
         </a>

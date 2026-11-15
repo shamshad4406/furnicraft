@@ -51,10 +51,17 @@ class ProductController extends Controller
 
         $this->recentlyViewed->record($request, $product);
 
+        $reviews = app(\App\Services\ReviewService::class);
+
         return view('front.product-show', [
             'product' => $product,
             'related' => $this->related($product),
             'recentlyViewed' => $this->recentlyViewed->products($request, $product),
+
+            // Only approved reviews ever reach a customer.
+            'reviews' => $product->reviews()->approved()->latest('id')->limit(10)->get(),
+            'reviewBreakdown' => $reviews->breakdown($product),
+            'canReview' => settings()->bool('reviews_enabled', true),
         ]);
     }
 

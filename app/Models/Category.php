@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Support\BundledArt;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Storage;
 use Spatie\Activitylog\LogOptions;
@@ -103,11 +104,18 @@ class Category extends Model
 
     public function getImageUrlAttribute(): ?string
     {
-        if ($this->image && Storage::disk('public')->exists($this->image)) {
-            return Storage::disk('public')->url($this->image);
+        if (! $this->image) {
+            return null;
         }
 
-        return null;
+        // Demo artwork shipped with the app, not a staff upload.
+        if (BundledArt::is($this->image)) {
+            return BundledArt::exists($this->image) ? BundledArt::url($this->image) : null;
+        }
+
+        return Storage::disk('public')->exists($this->image)
+            ? Storage::disk('public')->url($this->image)
+            : null;
     }
 
     /**

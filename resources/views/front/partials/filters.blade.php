@@ -106,7 +106,31 @@
         </div>
     </div>
 
-    <button type="submit" class="btn btn-navy w-100">Apply filters</button>
+    <div class="fc-filters__group">
+        <h3>Customer rating</h3>
 
-    <p class="fc-filters__note">Customer ratings arrive with the review module in Phase 8.</p>
+        @foreach ([4, 3, 2] as $stars)
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="rating" value="{{ $stars }}"
+                       id="filterRating{{ $stars }}" @checked((int) request('rating') === $stars)>
+                <label class="form-check-label d-flex align-items-center gap-1" for="filterRating{{ $stars }}">
+                    <span class="fc-stars fc-stars--sm" role="img" aria-label="{{ $stars }} stars and up">
+                        @for ($i = 1; $i <= 5; $i++)
+                            <i class="bi bi-star{{ $i <= $stars ? '-fill' : '' }}"></i>
+                        @endfor
+                    </span>
+                    <span class="small text-muted">&amp; up</span>
+                </label>
+            </div>
+        @endforeach
+
+        @if (request()->filled('rating'))
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="rating" value="" id="filterRatingAny" >
+                <label class="form-check-label small text-muted" for="filterRatingAny">Any rating</label>
+            </div>
+        @endif
+    </div>
+
+    <button type="submit" class="btn btn-navy w-100">Apply filters</button>
 </form>

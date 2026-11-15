@@ -2,6 +2,10 @@
 
 @section('title', settings('company_name', 'FurniCraft'))
 
+@push('schema')
+    @include('front.partials.schema', ['data' => app(\App\Services\SeoService::class)->organisation()])
+@endpush
+
 @section('content')
 
     {{-- ------------------------------------------------------------ hero --}}
@@ -10,20 +14,33 @@
             <div class="carousel-inner">
                 @foreach ($slides as $index => $slide)
                     <div class="carousel-item {{ $index === 0 ? 'active' : '' }}">
-                        <img src="{{ asset($slide['image']) }}" alt="{{ $slide['title'] }} {{ $slide['highlight'] }}"
-                             @if($index > 0) loading="lazy" @endif>
+                        {{-- A portrait crop on phones where one was given;
+                             the wide image is squeezed otherwise. --}}
+                        <picture>
+                            @if ($slide['mobile_image'] && $slide['mobile_image'] !== $slide['image'])
+                                <source media="(max-width: 575px)" srcset="{{ $slide['mobile_image'] }}">
+                            @endif
+                            <img src="{{ $slide['image'] }}" alt="{{ $slide['alt'] }}"
+                                 @if ($index > 0) loading="lazy" @endif>
+                        </picture>
 
                         <div class="fc-hero__caption">
                             <div class="container-fc">
                                 <div class="fc-hero__text">
                                     <h1>
                                         {{ $slide['title'] }}
-                                        <span>{{ $slide['highlight'] }}</span>
+                                        @if ($slide['highlight'])
+                                            <span>{{ $slide['highlight'] }}</span>
+                                        @endif
                                     </h1>
-                                    <p>{{ $slide['subtitle'] }}</p>
-                                    <a href="{{ route('products') }}" class="btn btn-navy btn-lg d-inline-flex align-items-center gap-2">
-                                        {{ $slide['cta'] }} <i class="bi bi-arrow-right"></i>
-                                    </a>
+                                    @if ($slide['subtitle'])
+                                        <p>{{ $slide['subtitle'] }}</p>
+                                    @endif
+                                    @if ($slide['cta'])
+                                        <a href="{{ $slide['url'] }}" class="btn btn-navy btn-lg d-inline-flex align-items-center gap-2">
+                                            {{ $slide['cta'] }} <i class="bi bi-arrow-right"></i>
+                                        </a>
+                                    @endif
                                 </div>
                             </div>
                         </div>
@@ -145,18 +162,43 @@
             <div class="fc-section-title"><h2>What Our Customers Say</h2></div>
 
             <div class="row g-3 row-cols-1 row-cols-md-3">
-                @foreach ($testimonials as $testimonial)
+                {{-- Real approved reviews once staff have featured some;
+                     the written-in ones until then. --}}
+                @forelse ($reviews as $review)
                     <div class="col">
                         <figure class="fc-testimonial">
-                            <i class="bi bi-quote"></i>
-                            <blockquote>{{ $testimonial['quote'] }}</blockquote>
+                            <div class="fc-stars" role="img" aria-label="{{ $review->stars }} out of 5">
+                                @for ($i = 1; $i <= 5; $i++)
+                                    <i class="bi bi-star{{ $i <= $review->stars ? '-fill' : '' }}"></i>
+                                @endfor
+                            </div>
+                            <blockquote>{{ Str::limit($review->body, 220) }}</blockquote>
                             <figcaption>
-                                <strong>{{ $testimonial['name'] }}</strong>
-                                <span>{{ $testimonial['place'] }}</span>
+                                <strong>{{ $review->display_name }}</strong>
+                                <span>
+                                    {{ $review->city }}@if ($review->city && $review->product) · @endif
+                                    @if ($review->product){{ $review->product->name }}@endif
+                                </span>
+                                @if ($review->is_verified)
+                                    <span class="fc-verified"><i class="bi bi-patch-check-fill"></i> Verified purchase</span>
+                                @endif
                             </figcaption>
                         </figure>
                     </div>
-                @endforeach
+                @empty
+                    @foreach ($testimonials as $testimonial)
+                        <div class="col">
+                            <figure class="fc-testimonial">
+                                <i class="bi bi-quote"></i>
+                                <blockquote>{{ $testimonial['quote'] }}</blockquote>
+                                <figcaption>
+                                    <strong>{{ $testimonial['name'] }}</strong>
+                                    <span>{{ $testimonial['place'] }}</span>
+                                </figcaption>
+                            </figure>
+                        </div>
+                    @endforeach
+                @endforelse
             </div>
         </div>
     </section>

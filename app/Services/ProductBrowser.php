@@ -21,13 +21,14 @@ class ProductBrowser
         'price_low' => 'Price: low to high',
         'price_high' => 'Price: high to low',
         'name' => 'Name: A to Z',
+        'rating' => 'Best rated',
     ];
 
     /** Filter keys the listing understands, for building "clear" links. */
     public const FILTER_KEYS = [
         'q', 'category', 'brand', 'material', 'color', 'size',
         'min_price', 'max_price', 'discount', 'in_stock',
-        'best_seller', 'new_arrival',
+        'best_seller', 'new_arrival', 'rating',
     ];
 
     /**
@@ -52,6 +53,8 @@ class ProductBrowser
             'in_stock' => ['nullable', 'boolean'],
             'best_seller' => ['nullable', 'boolean'],
             'new_arrival' => ['nullable', 'boolean'],
+            // "4 and up", the way every shop does it.
+            'rating' => ['nullable', 'integer', 'between:1,5'],
             'sort' => ['nullable', 'string', 'in:'.implode(',', array_keys(self::SORTS))],
             'page' => ['nullable', 'integer', 'min:1', 'max:10000'],
         ];
@@ -117,6 +120,13 @@ class ProductBrowser
             });
         }
 
+        if ($request->filled('rating')) {
+            // "4 stars and up", and only products that have actually been
+            // rated — an unrated product is not a four-star one.
+            $query->where('rating_count', '>', 0)
+                ->where('rating_average', '>=', (int) $request->input('rating'));
+        }
+
         return $this->applySort($query, (string) $request->input('sort', 'featured'));
     }
 
@@ -141,6 +151,9 @@ class ProductBrowser
             'price_low' => $query->orderByRaw('COALESCE(sale_price, price) ASC')->orderBy('id'),
             'price_high' => $query->orderByRaw('COALESCE(sale_price, price) DESC')->orderBy('id'),
             'name' => $query->orderBy('name'),
+            // Unrated products go last rather than mixing in among the
+            // four-star ones: no rating is not the same as a middling one.
+            'rating' => $query->orderByDesc('rating_average')->orderByDesc('rating_count')->orderBy('id'),
             // "Featured" puts flagged products first, then the staff sort order.
             default => $query->orderByDesc('is_featured')->orderBy('sort_order')->orderBy('id'),
         };

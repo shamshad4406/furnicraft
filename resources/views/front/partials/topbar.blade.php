@@ -24,7 +24,7 @@
                                 style="color:inherit;font-size:inherit;text-decoration:none">Logout</button>
                     </form>
                 @else
-                    <a href="{{ route('page', 'contact-us') }}">Enquiry</a>
+                    <a href="{{ route('enquiry.create') }}">Enquiry</a>
                     <span class="fc-topbar__divider">|</span>
                     <a href="{{ route('page', 'contact-us') }}">Contact Us</a>
                 @endauth

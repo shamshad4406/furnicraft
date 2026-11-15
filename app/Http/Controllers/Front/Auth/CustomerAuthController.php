@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Front\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Front\WishlistController;
 use App\Models\Customer;
+use App\Services\CartService;
 use App\Services\LoginHistoryService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -50,6 +52,11 @@ class CustomerAuthController extends Controller
             throw ValidationException::withMessages(['email' => 'This account has been disabled.']);
         }
 
+        // The guest cart and wishlist rows are keyed on the session id, and
+        // attempt() migrates the session the moment it succeeds — so take a
+        // note of the id those rows were written under before calling it.
+        $guestSessionId = $request->session()->getId();
+
         if (! Auth::guard('customer')->attempt($request->only('email', 'password'), $request->boolean('remember'))) {
             RateLimiter::hit($key);
             $this->history->failed($request, 'customer', $request->input('email'));
@@ -69,6 +76,9 @@ class CustomerAuthController extends Controller
 
         $this->history->success($request, 'customer', $authenticated);
 
+        // Whatever they put in the cart or wishlist as a guest comes with them.
+        $this->adoptGuestSession($guestSessionId, (int) $authenticated->id);
+
         return redirect()->intended(route('home'))->with('success', 'Welcome back, '.$authenticated->name.'.');
     }
 
@@ -86,14 +96,30 @@ class CustomerAuthController extends Controller
             'password' => ['required', 'confirmed', Password::min(8)->letters()->numbers()],
         ]);
 
-        // OTP verification for email/mobile is added in Phase 4.
         $customer = Customer::create($data + ['is_active' => true]);
+
+        $guestSessionId = $request->session()->getId();
 
         Auth::guard('customer')->login($customer);
         $request->session()->regenerate();
         $this->history->success($request, 'customer', $customer);
 
+        $this->adoptGuestSession($guestSessionId, (int) $customer->id);
+
         return redirect()->route('home')->with('success', 'Your account has been created.');
+    }
+
+    /**
+     * Carry a guest's cart and wishlist onto their account.
+     *
+     * Takes the session id the guest rows were written under, not the request:
+     * signing in regenerates the session, so by the time this runs the request
+     * no longer knows the id those rows are keyed on.
+     */
+    protected function adoptGuestSession(string $guestSessionId, int $customerId): void
+    {
+        app(CartService::class)->mergeGuestCart($guestSessionId, $customerId);
+        WishlistController::mergeGuest($guestSessionId, $customerId);
     }
 
     public function logout(Request $request): RedirectResponse

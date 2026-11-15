@@ -32,6 +32,7 @@
                     <li><i class="bi bi-chevron-right"></i><a href="{{ route('home') }}">Home</a></li>
                     <li><i class="bi bi-chevron-right"></i><a href="{{ route('categories') }}">Categories</a></li>
                     <li><i class="bi bi-chevron-right"></i><a href="{{ route('products') }}">Products</a></li>
+                    <li><i class="bi bi-chevron-right"></i><a href="{{ route('track.form') }}">Track Order</a></li>
                     @foreach ($footerPages->take(4) as $footerPage)
                         <li>
                             <i class="bi bi-chevron-right"></i>
@@ -74,14 +75,39 @@
             </div>
 
             <div class="col-lg-2 col-md-6">
-                <div class="fc-footer__subscribe">
-                    <h5>Subscribe for Updates</h5>
-                    {{-- The subscriber list is built in Phase 8 (Marketing & SEO). --}}
-                    <form class="d-flex flex-column gap-2" method="GET" action="{{ route('page', 'contact-us') }}">
-                        <input type="email" name="subscribe" class="form-control" placeholder="Enter your email" aria-label="Email address" required>
-                        <button type="submit" class="btn">Subscribe</button>
-                    </form>
-                </div>
+                @if (settings()->bool('newsletter_enabled', true))
+                    <div class="fc-footer__subscribe">
+                        <h5>Subscribe for Updates</h5>
+
+                        @if (filled(settings('newsletter_intro')))
+                            <p class="small mb-2" style="opacity:.75">{{ settings('newsletter_intro') }}</p>
+                        @endif
+
+                        <form class="d-flex flex-column gap-2" method="POST" action="{{ route('newsletter.subscribe') }}">
+                            @csrf
+                            <input type="hidden" name="source" value="footer">
+
+                            {{-- Hidden from people, irresistible to bots. --}}
+                            <div class="fc-hp" aria-hidden="true">
+                                <label for="footerWebsite">Leave this empty</label>
+                                <input type="text" id="footerWebsite" name="website" tabindex="-1" autocomplete="off">
+                            </div>
+
+                            <input type="email" name="email" class="form-control @error('email') is-invalid @enderror"
+                                   placeholder="Enter your email" aria-label="Email address"
+                                   value="{{ old('email') }}" required>
+                            @error('email') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
+
+                            <button type="submit" class="btn">Subscribe</button>
+                        </form>
+
+                        @if (settings()->bool('newsletter_double_optin', true))
+                            <p class="small mt-2 mb-0" style="opacity:.7">
+                                We send a confirmation link first — nothing until you click it.
+                            </p>
+                        @endif
+                    </div>
+                @endif
             </div>
         </div>
 

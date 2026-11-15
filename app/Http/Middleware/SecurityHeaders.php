@@ -43,29 +43,58 @@ class SecurityHeaders
             $response->headers->set('Pragma', 'no-cache');
         }
 
-        $response->headers->set('Content-Security-Policy', $this->policy());
+        $response->headers->set('Content-Security-Policy', $this->policy($request));
 
         return $response;
+    }
+
+    /**
+     * Razorpay's widget is only allowed where payment actually happens, so the
+     * rest of the site keeps the tighter policy.
+     */
+    protected function needsPaymentGateway(Request $request): bool
+    {
+        return $request->is('checkout/*/pay');
     }
 
     /**
      * Kept deliberately narrow: this app loads scripts and styles from its own
      * origin plus the CDNs the layouts actually reference.
      */
-    protected function policy(): string
+    protected function policy(Request $request): string
     {
+        $gateway = $this->needsPaymentGateway($request);
+
+        // Razorpay loads its widget script, opens an iframe for the payment
+        // form, and calls its own API from the page.
+        $razorpayScript = $gateway ? ' https://checkout.razorpay.com' : '';
+        $razorpayFrame = $gateway ? 'https://api.razorpay.com https://checkout.razorpay.com' : "'none'";
+        $razorpayConnect = $gateway ? ' https://lumberjack.razorpay.com https://api.razorpay.com https://checkout.razorpay.com' : '';
+        $razorpayImg = $gateway ? ' https://cdn.razorpay.com https://badges.razorpay.com' : '';
+
+        // Google's hosts are allowed only once a measurement ID is set, so a
+        // shop that never turns analytics on keeps the tighter policy.
+        $analytics = filled(settings('google_analytics_id'));
+        $analyticsScript = $analytics ? ' https://www.googletagmanager.com' : '';
+        $analyticsConnect = $analytics
+            ? ' https://www.google-analytics.com https://analytics.google.com https://www.googletagmanager.com'
+            : '';
+        $analyticsImg = $analytics ? ' https://www.google-analytics.com https://www.googletagmanager.com' : '';
+
         return implode('; ', [
             "default-src 'self'",
             "base-uri 'self'",
+            // Razorpay posts the result back to us, so our own origin is enough.
             "form-action 'self'",
             "frame-ancestors 'none'",
             "object-src 'none'",
+            'frame-src '.$razorpayFrame,
             // Blade uses a few inline style attributes; fonts come from Google.
             "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
             "font-src 'self' https://fonts.gstatic.com data:",
-            "script-src 'self'",
-            "img-src 'self' data:",
-            "connect-src 'self'",
+            "script-src 'self'".$razorpayScript.$analyticsScript,
+            "img-src 'self' data:".$razorpayImg.$analyticsImg,
+            "connect-src 'self'".$razorpayConnect.$analyticsConnect,
         ]);
     }
 }

@@ -42,6 +42,8 @@ class Product extends Model
         'price',
         'sale_price',
         'stock_quantity',
+        'low_stock_threshold',
+        'cost_price',
         'meta_title',
         'meta_description',
         'custom_order_allowed',
@@ -188,6 +190,69 @@ class Product extends Model
         $variantStock = $this->variants()->sum('stock_quantity');
 
         return $this->variants()->exists() ? (int) $variantStock : (int) $this->stock_quantity;
+    }
+
+    public function stockMovements(): HasMany
+    {
+        return $this->hasMany(StockMovement::class)->latest('id');
+    }
+
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(Review::class);
+    }
+
+    public function hasRating(): bool
+    {
+        return $this->rating_count > 0;
+    }
+
+    /**
+     * The level below which this product needs reordering.
+     *
+     * Its own figure if it has one, otherwise the shop-wide default: a
+     * three-piece sofa set and a pack of screws should not share a threshold,
+     * but most products never need one of their own.
+     */
+    public function getEffectiveLowStockThresholdAttribute(): int
+    {
+        return (int) ($this->low_stock_threshold ?? settings('low_stock_threshold', 5));
+    }
+
+    public function isLowStock(): bool
+    {
+        return $this->total_stock <= $this->effective_low_stock_threshold;
+    }
+
+    public function isOutOfStock(): bool
+    {
+        return $this->total_stock <= 0;
+    }
+
+    /**
+     * Products at or below their reorder level, worst first.
+     *
+     * Variants are summed in SQL rather than in PHP, so this stays one query
+     * however many products the shop has.
+     *
+     * @param  Builder<self>  $query
+     */
+    public function scopeLowStock(Builder $query): Builder
+    {
+        $default = (int) settings('low_stock_threshold', 5);
+
+        // Both sides of the comparison are aliases: MySQL refuses a bare
+        // column in HAVING when there is no GROUP BY.
+        return $query
+            ->selectRaw('products.*,
+                COALESCE((
+                    SELECT SUM(pv.stock_quantity) FROM product_variants pv
+                    WHERE pv.product_id = products.id
+                ), products.stock_quantity) as effective_stock,
+                COALESCE(products.low_stock_threshold, ?) as effective_threshold', [$default])
+            ->where('products.status', 'active')
+            ->havingRaw('effective_stock <= effective_threshold')
+            ->orderByRaw('effective_stock ASC');
     }
 
     public function getThumbnailUrlAttribute(): ?string
