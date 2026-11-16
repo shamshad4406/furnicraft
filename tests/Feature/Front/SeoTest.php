@@ -235,6 +235,28 @@ class SeoTest extends TestCase
         $this->assertSame(1, $data['aggregateRating']['reviewCount']);
     }
 
+    /**
+     * @json hands its flags straight to json_encode, replacing Laravel's
+     * defaults rather than adding to them. Drop JSON_HEX_TAG and a "<" in a
+     * product name closes the script tag it sits in — stored XSS written by
+     * whoever can name a product.
+     */
+    public function test_a_tag_in_a_product_name_cannot_close_the_schema_block(): void
+    {
+        $this->product->update(['name' => 'Sofa </script><script>alert(1)</script>']);
+
+        $html = $this->get(route('product.show', $this->product->slug))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringNotContainsString('<script>alert(1)</script>', $html);
+        $this->assertStringContainsString('<', $html);
+
+        // Still valid JSON-LD after escaping, or search engines read nothing.
+        preg_match('#<script type="application/ld\+json">(.*?)</script>#s', $html, $m);
+        $this->assertNotNull(json_decode($m[1] ?? '', true), 'The JSON-LD block did not parse.');
+    }
+
     public function test_the_product_page_carries_its_json_ld(): void
     {
         $html = $this->get(route('product.show', $this->product->slug))
