@@ -31,7 +31,7 @@ Tables added: `banners`, `reviews`, `newsletter_subscribers`. Columns added to `
 - [x] **Nothing private is in the sitemap or indexable** — accounts, checkout, carts, and anything addressed by a one-off token.
 - [x] **No structured-data claim without the fact behind it.** `AggregateRating` only with published reviews; `availability` from the actual stock.
 - [x] **No inline script**, so the content-security policy stays as strict as it was.
-- [x] **Everything is tested** — 671 feature tests pass (601 before this phase, 70 new).
+- [x] **Everything is tested** — 672 feature tests pass (601 before this phase, 71 new).
 
 ## Reviews
 
@@ -118,6 +118,8 @@ The sitemap carries active products, active categories, active CMS pages and the
 | `BreadcrumbList` | Listings and product pages |
 
 Every page carries a canonical URL **without the query string**, so a filtered listing and a sorted one do not compete with each other.
+
+**The JSON-LD block escapes `<` to `<`, and that is not cosmetic.** `@json($data, $flags)` hands the flags straight to `json_encode`, *replacing* Laravel's defaults rather than adding to them — so naming only `JSON_UNESCAPED_SLASHES` drops `JSON_HEX_TAG`, and a `<` in a product name, a brand or an approved review closes the `<script type="application/ld+json">` tag it sits inside. That is stored XSS on every visitor's product page, written by whoever can name a product. The first version of this partial had exactly that bug; `SecurityTest` caught it and `SeoTest` now guards it, checking both that the tag cannot close and that the block still parses as JSON.
 
 ### Analytics
 

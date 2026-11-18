@@ -67,7 +67,7 @@ Output lands in `public/assets/` and is linked with `asset_v()`, which appends t
 php artisan test
 ```
 
-671 feature tests. They run against `furnicraft_test`, configured in `phpunit.xml`; create it once with `CREATE DATABASE furnicraft_test;`.
+672 feature tests. They run against `furnicraft_test`, configured in `phpunit.xml`; create it once with `CREATE DATABASE furnicraft_test;`.
 
 ## Project objective
 
