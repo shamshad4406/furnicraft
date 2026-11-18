@@ -109,7 +109,7 @@
                                     <td class="text-end">{{ $item->quantity }}</td>
                                     <td class="text-end small">{{ money($item->unit_price) }}</td>
                                     <td class="text-end small text-muted">
-                                        {{ rtrim(rtrim(number_format((float) $item->gst_rate, 2), '0'), '.') }}%
+                                        {{ rtrim(rtrim(indian_number_format((float) $item->gst_rate, 2), '0'), '.') }}%
                                     </td>
                                     <td class="text-end fw-semibold">{{ money($item->line_total) }}</td>
                                 </tr>
@@ -186,7 +186,7 @@
 
             <dl class="fc-summary__rows mb-0">
                 <dt>Subtotal</dt>
-                <dd><span data-total-subtotal>{{ number_format((float) $quotation->subtotal, 2) }}</span></dd>
+                <dd><span data-total-subtotal>{{ indian_number_format((float) $quotation->subtotal, 2) }}</span></dd>
 
                 @if ($quotation->discount > 0)
                     <dt class="is-discount">Discount</dt>
@@ -197,10 +197,10 @@
                 <dd>{{ $quotation->delivery_charge > 0 ? money($quotation->delivery_charge) : 'Free' }}</dd>
 
                 <dt>GST within</dt>
-                <dd><span data-total-tax>{{ number_format((float) $quotation->tax_total, 2) }}</span></dd>
+                <dd><span data-total-tax>{{ indian_number_format((float) $quotation->tax_total, 2) }}</span></dd>
 
                 <dt class="fw-bold">Total</dt>
-                <dd class="fw-bold"><span data-total-grand>{{ number_format((float) $quotation->grand_total, 2) }}</span></dd>
+                <dd class="fw-bold"><span data-total-grand>{{ indian_number_format((float) $quotation->grand_total, 2) }}</span></dd>
             </dl>
 
             <p class="small text-muted mt-2 mb-0">

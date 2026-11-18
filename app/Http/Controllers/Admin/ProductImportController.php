@@ -19,8 +19,12 @@ class ProductImportController extends Controller implements HasMiddleware
     public static function middleware(): array
     {
         return [
-            new Middleware('permission:products.view', only: ['index', 'export', 'template']),
-            new Middleware('permission:products.create', only: ['store']),
+            // Exporting is reading, so view is enough. The import screen is
+            // not: its only purpose is to write products, and showing it to
+            // somebody with read-only access means they pick a file, fill
+            // the form in and only then get told no.
+            new Middleware('permission:products.view', only: ['export']),
+            new Middleware('permission:products.create', only: ['index', 'store', 'template']),
         ];
     }
 

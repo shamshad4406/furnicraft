@@ -206,11 +206,11 @@
                     </td>
                     <td>{{ $item->hsn_code ?: '—' }}</td>
                     <td class="num">{{ $item->quantity }}</td>
-                    <td class="num">{{ number_format((float) $item->unit_price, 2) }}</td>
-                    <td class="num">{{ number_format($taxable, 2) }}</td>
+                    <td class="num">{{ indian_number_format((float) $item->unit_price, 2) }}</td>
+                    <td class="num">{{ indian_number_format($taxable, 2) }}</td>
                     <td class="num">{{ rtrim(rtrim(number_format((float) $item->gst_rate, 2), '0'), '.') }}%</td>
-                    <td class="num">{{ number_format((float) $item->tax_amount, 2) }}</td>
-                    <td class="num">{{ number_format((float) $item->line_total, 2) }}</td>
+                    <td class="num">{{ indian_number_format((float) $item->tax_amount, 2) }}</td>
+                    <td class="num">{{ indian_number_format((float) $item->line_total, 2) }}</td>
                 </tr>
             @endforeach
         </tbody>
@@ -235,28 +235,28 @@
             @foreach ($taxSummary as $row)
                 <tr>
                     <td>{{ rtrim(rtrim(number_format($row['rate'], 2), '0'), '.') }}%</td>
-                    <td class="num">{{ number_format($row['taxable'], 2) }}</td>
+                    <td class="num">{{ indian_number_format($row["taxable"], 2) }}</td>
                     @if ($order->is_interstate)
-                        <td class="num">{{ number_format($row['igst'], 2) }}</td>
+                        <td class="num">{{ indian_number_format($row["igst"], 2) }}</td>
                     @else
-                        <td class="num">{{ number_format($row['cgst'], 2) }}</td>
-                        <td class="num">{{ number_format($row['sgst'], 2) }}</td>
+                        <td class="num">{{ indian_number_format($row["cgst"], 2) }}</td>
+                        <td class="num">{{ indian_number_format($row["sgst"], 2) }}</td>
                     @endif
-                    <td class="num">{{ number_format($row['total'], 2) }}</td>
+                    <td class="num">{{ indian_number_format($row["total"], 2) }}</td>
                 </tr>
             @endforeach
         </tbody>
         <tfoot>
             <tr>
                 <td>Total</td>
-                <td class="num">{{ number_format($taxTotals['taxable'], 2) }}</td>
+                <td class="num">{{ indian_number_format($taxTotals["taxable"], 2) }}</td>
                 @if ($order->is_interstate)
-                    <td class="num">{{ number_format($taxTotals['igst'], 2) }}</td>
+                    <td class="num">{{ indian_number_format($taxTotals["igst"], 2) }}</td>
                 @else
-                    <td class="num">{{ number_format($taxTotals['cgst'], 2) }}</td>
-                    <td class="num">{{ number_format($taxTotals['sgst'], 2) }}</td>
+                    <td class="num">{{ indian_number_format($taxTotals["cgst"], 2) }}</td>
+                    <td class="num">{{ indian_number_format($taxTotals["sgst"], 2) }}</td>
                 @endif
-                <td class="num">{{ number_format($taxTotals['tax'], 2) }}</td>
+                <td class="num">{{ indian_number_format($taxTotals["tax"], 2) }}</td>
             </tr>
         </tfoot>
     </table>
@@ -266,23 +266,23 @@
             <tbody>
                 <tr>
                     <td>Taxable value</td>
-                    <td class="num">{{ number_format($taxTotals['taxable'], 2) }}</td>
+                    <td class="num">{{ indian_number_format($taxTotals["taxable"], 2) }}</td>
                 </tr>
                 @if ($order->is_interstate)
-                    <tr><td>IGST</td><td class="num">{{ number_format($taxTotals['igst'], 2) }}</td></tr>
+                    <tr><td>IGST</td><td class="num">{{ indian_number_format($taxTotals["igst"], 2) }}</td></tr>
                 @else
-                    <tr><td>CGST</td><td class="num">{{ number_format($taxTotals['cgst'], 2) }}</td></tr>
-                    <tr><td>SGST</td><td class="num">{{ number_format($taxTotals['sgst'], 2) }}</td></tr>
+                    <tr><td>CGST</td><td class="num">{{ indian_number_format($taxTotals["cgst"], 2) }}</td></tr>
+                    <tr><td>SGST</td><td class="num">{{ indian_number_format($taxTotals["sgst"], 2) }}</td></tr>
                 @endif
                 @if ($order->discount > 0)
                     <tr>
                         <td>Discount @if ($order->coupon_code) ({{ $order->coupon_code }}) @endif</td>
-                        <td class="num">− {{ number_format((float) $order->discount, 2) }}</td>
+                        <td class="num">− {{ indian_number_format((float) $order->discount, 2) }}</td>
                     </tr>
                 @endif
                 <tr>
                     <td>Delivery</td>
-                    <td class="num">{{ $order->delivery_charge > 0 ? number_format((float) $order->delivery_charge, 2) : 'Free' }}</td>
+                    <td class="num">{{ $order->delivery_charge > 0 ? indian_number_format((float) $order->delivery_charge, 2) : 'Free' }}</td>
                 </tr>
                 <tr class="grand">
                     <td>Total</td>
@@ -291,7 +291,7 @@
                 @if ($order->amount_due > 0)
                     <tr>
                         <td>Paid</td>
-                        <td class="num">{{ number_format((float) $order->amount_paid, 2) }}</td>
+                        <td class="num">{{ indian_number_format((float) $order->amount_paid, 2) }}</td>
                     </tr>
                     <tr>
                         <td>Payable on delivery</td>

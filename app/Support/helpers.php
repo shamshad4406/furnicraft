@@ -47,7 +47,43 @@ if (! function_exists('money')) {
     {
         $symbol = (string) settings('currency_symbol', '₹');
 
-        return $symbol.' '.number_format((float) $amount, $decimals);
+        return $symbol.' '.indian_number_format((float) $amount, $decimals);
+    }
+}
+
+if (! function_exists('indian_number_format')) {
+    /**
+     * Group digits the Indian way: 1,79,499 rather than 179,499.
+     *
+     * The last three digits stay together and everything above them is cut
+     * into pairs, which is what lakh and crore mean. number_format() groups
+     * in thousands, so an invoice was printing "₹ 179,499" in figures next
+     * to "One Lakh Seventy Nine Thousand" in words — the same amount said
+     * two different ways on one legal document.
+     *
+     * Only the grouping changes; the value and the rounding do not.
+     */
+    function indian_number_format(float $amount, int $decimals = 0): string
+    {
+        $negative = $amount < 0;
+
+        // Round first, so 99,999.6 carries into the lakh group rather than
+        // being grouped as 99,999 and then rounded.
+        $rounded = number_format(abs($amount), $decimals, '.', '');
+
+        [$whole, $fraction] = array_pad(explode('.', $rounded), 2, null);
+
+        if (strlen($whole) > 3) {
+            $last = substr($whole, -3);
+            $rest = substr($whole, 0, -3);
+
+            // Pairs from the right: 12345 -> "12", 1234567 -> "12,34".
+            $rest = preg_replace('/\B(?=(\d{2})+(?!\d))/', ',', $rest);
+
+            $whole = $rest.','.$last;
+        }
+
+        return ($negative ? '-' : '').$whole.($fraction !== null ? '.'.$fraction : '');
     }
 }
 

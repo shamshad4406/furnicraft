@@ -201,7 +201,7 @@
 
             <dl class="fc-summary__rows mb-0">
                 <dt>Subtotal</dt>
-                <dd><span data-total-subtotal>{{ number_format((float) $order->subtotal, 2) }}</span></dd>
+                <dd><span data-total-subtotal>{{ indian_number_format((float) $order->subtotal, 2) }}</span></dd>
 
                 @if ($order->other_charges > 0)
                     <dt>Other charges</dt>
@@ -209,10 +209,10 @@
                 @endif
 
                 <dt>GST within</dt>
-                <dd><span data-total-tax>{{ number_format((float) $order->tax_total, 2) }}</span></dd>
+                <dd><span data-total-tax>{{ indian_number_format((float) $order->tax_total, 2) }}</span></dd>
 
                 <dt class="fw-bold">Total</dt>
-                <dd class="fw-bold"><span data-total-grand>{{ number_format((float) $order->grand_total, 2) }}</span></dd>
+                <dd class="fw-bold"><span data-total-grand>{{ indian_number_format((float) $order->grand_total, 2) }}</span></dd>
             </dl>
 
             @if ($order->expected_on)

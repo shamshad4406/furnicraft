@@ -59,9 +59,14 @@
         /**
          * Formatted the way PHP's money() helper does it, so the figure that
          * updates as staff type matches the one that comes back after saving.
+         *
+         * en-IN, not en-US: India groups in lakh and crore, so 179499 reads
+         * 1,79,499. With en-US here the total would jump from 179,499.00
+         * while typing to 1,79,499.00 after saving, which is exactly the
+         * mismatch this function exists to avoid.
          */
         function money(value) {
-            return (Math.round(value * 100) / 100).toLocaleString('en-US', {
+            return (Math.round(value * 100) / 100).toLocaleString('en-IN', {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2,
             });

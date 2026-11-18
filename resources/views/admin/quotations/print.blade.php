@@ -174,9 +174,9 @@
                     </td>
                     <td>{{ $item->hsn_code ?: '—' }}</td>
                     <td class="num">{{ $item->quantity }}</td>
-                    <td class="num">{{ number_format((float) $item->unit_price, 2) }}</td>
+                    <td class="num">{{ indian_number_format((float) $item->unit_price, 2) }}</td>
                     <td class="num">{{ rtrim(rtrim(number_format((float) $item->gst_rate, 2), '0'), '.') }}%</td>
-                    <td class="num">{{ number_format((float) $item->line_total, 2) }}</td>
+                    <td class="num">{{ indian_number_format((float) $item->line_total, 2) }}</td>
                 </tr>
             @endforeach
         </tbody>
@@ -201,14 +201,14 @@
                 @foreach ($taxSummary as $row)
                     <tr>
                         <td>{{ rtrim(rtrim(number_format($row['rate'], 2), '0'), '.') }}%</td>
-                        <td class="num">{{ number_format($row['taxable'], 2) }}</td>
+                        <td class="num">{{ indian_number_format($row['taxable'], 2) }}</td>
                         @if ($quotation->is_interstate)
-                            <td class="num">{{ number_format($row['igst'], 2) }}</td>
+                            <td class="num">{{ indian_number_format($row['igst'], 2) }}</td>
                         @else
-                            <td class="num">{{ number_format($row['cgst'], 2) }}</td>
-                            <td class="num">{{ number_format($row['sgst'], 2) }}</td>
+                            <td class="num">{{ indian_number_format($row['cgst'], 2) }}</td>
+                            <td class="num">{{ indian_number_format($row['sgst'], 2) }}</td>
                         @endif
-                        <td class="num">{{ number_format($row['total'], 2) }}</td>
+                        <td class="num">{{ indian_number_format($row['total'], 2) }}</td>
                     </tr>
                 @endforeach
             </tbody>
@@ -218,13 +218,13 @@
     <div class="totals">
         <table>
             <tbody>
-                <tr><td>Subtotal</td><td class="num">{{ number_format((float) $quotation->subtotal, 2) }}</td></tr>
+                <tr><td>Subtotal</td><td class="num">{{ indian_number_format((float) $quotation->subtotal, 2) }}</td></tr>
                 @if ($quotation->discount > 0)
-                    <tr><td>Discount</td><td class="num">− {{ number_format((float) $quotation->discount, 2) }}</td></tr>
+                    <tr><td>Discount</td><td class="num">− {{ indian_number_format((float) $quotation->discount, 2) }}</td></tr>
                 @endif
                 <tr>
                     <td>Delivery</td>
-                    <td class="num">{{ $quotation->delivery_charge > 0 ? number_format((float) $quotation->delivery_charge, 2) : 'Free' }}</td>
+                    <td class="num">{{ $quotation->delivery_charge > 0 ? indian_number_format((float) $quotation->delivery_charge, 2) : 'Free' }}</td>
                 </tr>
                 <tr class="grand"><td>Total</td><td class="num">{{ money($quotation->grand_total) }}</td></tr>
             </tbody>

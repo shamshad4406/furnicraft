@@ -45,7 +45,7 @@
     </td>
 
     <td class="text-end align-middle fw-semibold" data-line-total>
-        {{ $item ? number_format((float) $item->line_total, 2) : '0.00' }}
+        {{ $item ? indian_number_format((float) $item->line_total, 2) : '0.00' }}
     </td>
 
     <td class="text-end align-middle">

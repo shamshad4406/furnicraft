@@ -197,9 +197,15 @@ class ShopDemoSeeder extends Seeder
             'payment_status' => 'paid',
             'status' => 'delivered',
             'delivery_days' => 4,
-            'placed_at' => now()->subDays(12),
-            'confirmed_at' => now()->subDays(12),
-            'confirmation_sent_at' => now()->subDays(12),
+            'placed_at' => now()->subDays(6),
+            'confirmed_at' => now()->subDays(6),
+            'confirmation_sent_at' => now()->subDays(6),
+            // Without this the order says "Delivered" and yet has no delivery
+            // date and no return window — isReturnable() needs the timestamp,
+            // not the status, so the demo order's "request a return" link
+            // simply 404s. Dated inside the return window on purpose, so the
+            // Phase 5 return flow is actually demonstrable.
+            'delivered_at' => now()->subDays(2),
         ]);
 
         foreach ($lines as $line) {
