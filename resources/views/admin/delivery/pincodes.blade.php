@@ -102,32 +102,43 @@
 
     <div class="col-xl-4">
         @can('shipments.create')
-            <x-admin.card title="Add one pincode" icon="bi-plus-circle">
-                <form method="POST" action="{{ route('admin.delivery.pincodes.store') }}" novalidate>
-                    @csrf
+            {{-- The form has to wrap the card, not sit inside it. A
+                 <x-slot:footer> is the card component's slot: Blade lifts it
+                 out of the slot content and renders it in the card footer,
+                 which is outside any <form> written inside the card. The
+                 submit button then belongs to no form and the button does
+                 nothing at all when clicked. --}}
+            <form method="POST" action="{{ route('admin.delivery.pincodes.store') }}" novalidate>
+                @csrf
+
+                <x-admin.card title="Add one pincode" icon="bi-plus-circle">
                     <div class="row g-3">
                         <x-admin.input name="pincode" label="Pincode" col="col-6" required maxlength="6" />
                         <x-admin.input name="delivery_days" label="Days" type="number" min="1" col="col-6"
                                        help="Blank = zone default" />
                         <x-admin.input name="city" label="City" col="col-12" required />
                         <x-admin.input name="state" label="State" col="col-12" required />
-                        <x-admin.select name="delivery_zone_id" label="Delivery zone" col="col-12"
+                        <x-admin.select name="delivery_zone_id" label="Delivery zone" col="col-12" id="single-zone"
                                         :options="$zones->pluck('name', 'id')->all()" placeholder="— None —" />
                         <x-admin.switcher name="is_serviceable" col="col-6" :checked="true">Serviceable</x-admin.switcher>
                         <x-admin.switcher name="cod_available" col="col-6" :checked="true">COD</x-admin.switcher>
                     </div>
 
                     <x-slot:footer>
-                        <button class="btn btn-primary w-100"><i class="bi bi-plus-lg me-1"></i> Add Pincode</button>
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-plus-lg me-1"></i> Add Pincode
+                        </button>
                     </x-slot:footer>
-                </form>
-            </x-admin.card>
+                </x-admin.card>
+            </form>
 
-            <x-admin.card title="Bulk add" subtitle="One per line: pincode, city, state" icon="bi-list-ul" class="mt-3">
-                <form method="POST" action="{{ route('admin.delivery.pincodes.import') }}" novalidate>
-                    @csrf
+            <form method="POST" action="{{ route('admin.delivery.pincodes.import') }}" novalidate>
+                @csrf
+
+                <x-admin.card title="Bulk add" subtitle="One per line: pincode, city, state"
+                              icon="bi-list-ul" class="mt-3">
                     <div class="row g-3">
-                        <x-admin.select name="delivery_zone_id" label="Assign to zone" col="col-12" required
+                        <x-admin.select name="delivery_zone_id" label="Assign to zone" col="col-12" required id="bulk-zone"
                                         :options="$zones->pluck('name', 'id')->all()" placeholder="Select a zone" />
                         <x-admin.textarea name="rows" label="Pincodes" rows="8"
                                           placeholder="110001, New Delhi, Delhi&#10;201301, Noida, Uttar Pradesh"
@@ -135,12 +146,12 @@
                     </div>
 
                     <x-slot:footer>
-                        <button class="btn btn-outline-primary w-100">
+                        <button type="submit" class="btn btn-outline-primary w-100">
                             <i class="bi bi-upload me-1"></i> Add These Pincodes
                         </button>
                     </x-slot:footer>
-                </form>
-            </x-admin.card>
+                </x-admin.card>
+            </form>
         @endcan
     </div>
 </div>

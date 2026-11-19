@@ -19,7 +19,7 @@
               name="{{ $name }}"
               rows="{{ $rows }}"
               @if ($required) required @endif
-              {{ $attributes->merge(['class' => 'form-control'.($errors->has($name) ? ' is-invalid' : '')]) }}>{{ old($name, $value) }}</textarea>
+              {{ $attributes->except('id')->merge(['class' => 'form-control'.($errors->has($name) ? ' is-invalid' : '')]) }}>{{ old($name, $value) }}</textarea>
 
     @error($name)
         <div class="invalid-feedback">{{ $message }}</div>

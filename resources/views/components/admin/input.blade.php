@@ -20,7 +20,7 @@
            name="{{ $name }}"
            value="{{ old($name, $value) }}"
            @if ($required) required @endif
-           {{ $attributes->merge(['class' => 'form-control'.($errors->has($name) ? ' is-invalid' : '')]) }}>
+           {{ $attributes->except('id')->merge(['class' => 'form-control'.($errors->has($name) ? ' is-invalid' : '')]) }}>
 
     @error($name)
         <div class="invalid-feedback">{{ $message }}</div>

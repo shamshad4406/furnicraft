@@ -18,17 +18,22 @@
 <div class="row g-3">
     <div class="col-xl-8">
         @foreach ($zones as $zone)
-            <x-admin.card :title="$zone->name" :subtitle="$zone->description" icon="bi-map"
-                          class="{{ $loop->first ? '' : 'mt-3' }}">
-                <x-slot:actions>
-                    <span class="badge text-bg-light border">{{ $zone->pincodes_count }} pincode(s)</span>
-                    <span class="badge {{ $zone->is_active ? 'text-bg-success' : 'text-bg-secondary' }}">
-                        {{ $zone->is_active ? 'Active' : 'Inactive' }}
-                    </span>
-                </x-slot:actions>
+            {{-- The form wraps the card. A <x-slot:footer> written inside a
+                 form is lifted out of the slot content by Blade and rendered
+                 in the card footer, outside that form, leaving the submit
+                 button attached to nothing. --}}
+            <form method="POST" action="{{ route('admin.delivery.zones.update', $zone) }}" novalidate>
+                @csrf @method('PUT')
 
-                <form method="POST" action="{{ route('admin.delivery.zones.update', $zone) }}" novalidate>
-                    @csrf @method('PUT')
+                <x-admin.card :title="$zone->name" :subtitle="$zone->description" icon="bi-map"
+                              class="{{ $loop->first ? '' : 'mt-3' }}">
+                    <x-slot:actions>
+                        <span class="badge text-bg-light border">{{ $zone->pincodes_count }} pincode(s)</span>
+                        <span class="badge {{ $zone->is_active ? 'text-bg-success' : 'text-bg-secondary' }}">
+                            {{ $zone->is_active ? 'Active' : 'Inactive' }}
+                        </span>
+                    </x-slot:actions>
+
                     <div class="row g-3">
                         <x-admin.input name="name" label="Zone name" :value="$zone->name" required col="col-md-6"
                                        :id="'name-'.$zone->id" />
@@ -59,12 +64,14 @@
                     <x-slot:footer>
                         <div class="d-flex gap-2">
                             @can('shipments.edit')
-                                <button class="btn btn-primary btn-sm"><i class="bi bi-check-lg me-1"></i> Save Zone</button>
+                                <button type="submit" class="btn btn-primary btn-sm">
+                                    <i class="bi bi-check-lg me-1"></i> Save Zone
+                                </button>
                             @endcan
                         </div>
                     </x-slot:footer>
-                </form>
-            </x-admin.card>
+                </x-admin.card>
+            </form>
         @endforeach
 
         @if ($zones->isEmpty())
@@ -76,9 +83,10 @@
 
     <div class="col-xl-4">
         @can('shipments.create')
-            <x-admin.card title="Add a zone" icon="bi-plus-circle">
-                <form method="POST" action="{{ route('admin.delivery.zones.store') }}" novalidate>
-                    @csrf
+            <form method="POST" action="{{ route('admin.delivery.zones.store') }}" novalidate>
+                @csrf
+
+                <x-admin.card title="Add a zone" icon="bi-plus-circle">
                     <div class="row g-3">
                         <x-admin.input name="name" label="Zone name" col="col-12" required id="new-zone-name"
                                        placeholder="South India" />
@@ -97,10 +105,12 @@
                     </div>
 
                     <x-slot:footer>
-                        <button class="btn btn-primary w-100"><i class="bi bi-plus-lg me-1"></i> Create Zone</button>
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-plus-lg me-1"></i> Create Zone
+                        </button>
                     </x-slot:footer>
-                </form>
-            </x-admin.card>
+                </x-admin.card>
+            </form>
         @endcan
     </div>
 </div>

@@ -27,7 +27,7 @@
     <select id="{{ $id }}"
             name="{{ $name }}"
             @if ($required) required @endif
-            {{ $attributes->merge(['class' => 'form-select'.($errors->has($name) ? ' is-invalid' : '')]) }}>
+            {{ $attributes->except('id')->merge(['class' => 'form-select'.($errors->has($name) ? ' is-invalid' : '')]) }}>
         @if ($placeholder)
             <option value="">{{ $placeholder }}</option>
         @endif
